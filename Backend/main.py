@@ -8,6 +8,7 @@ from fastapi.openapi.docs import get_swagger_ui_html
 import uuid
 from datetime import datetime, timedelta, timezone
 import logging
+from typing import List
 # from jose import JWTError, jwt
 # import secrets
 # import os
@@ -15,7 +16,7 @@ import logging
 
 app = FastAPI(docs_url=None)
 
-@app.get("/api", include_in_schema=False)
+@app.get("/", include_in_schema=False)
 async def custom_swagger_ui_html():
     return get_swagger_ui_html(openapi_url="/openapi.json", title="Skill-Capital API")
 
@@ -69,6 +70,7 @@ class Lead(BaseModel):
     course : str
     class_mode : str
     next_followup : datetime
+    created_at : datetime
 
 @app.post("/Insert client/")
 async def insert_client(client: Client):
@@ -185,7 +187,7 @@ async def check_client(client: Client):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/Insert Leads")
+@app.post("/leads")
 async def insert_lead(lead: Lead):
     try:
         conn = get_db_connection()
@@ -206,19 +208,24 @@ async def insert_lead(lead: Lead):
                     stack VARCHAR(50) NOT NULL,
                     course VARCHAR(50) NOT NULL,
                     class_mode VARCHAR(50) NOT NULL,
-                    next_followup TIMESTAMP NOT NULL
+                    next_followup TIMESTAMP NOT NULL,
+                    created_at TIMESTAMP NOT NULL
                 );
             ''')
             cur.execute(create_table_query)
             conn.commit()
 
         insert_query = sql.SQL('''
-            INSERT INTO public.leads (name, cc, phone, email, fee_quoted, batch_timing, description, lead_status, lead_source, stack, course, class_mode, next_followup)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s,%s, %s, %s, %s, %s)
+            INSERT INTO public.leads (name, cc, phone, email, fee_quoted, batch_timing, description, lead_status, lead_source, stack, course, class_mode, next_followup, created_at)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s,%s, %s, %s, %s, %s,%s)
             ''')
         
+        created_at = datetime.now(timezone.utc)
+
         values = (
-            lead.name, lead.cc , lead.phone , lead.email , lead.fee_quoted, lead.batch_timing, lead.description, lead.lead_status , lead.lead_source , lead.stack , lead.course , lead.class_mode , lead.next_followup
+            lead.name, lead.cc , lead.phone , lead.email , lead.fee_quoted, lead.batch_timing, lead.description, 
+            lead.lead_status , lead.lead_source , lead.stack , lead.course , lead.class_mode , lead.next_followup,
+            created_at
         )
         
 
@@ -252,5 +259,50 @@ def check_table_exists(schema, table_name):
     except (Exception, psycopg2.Error) as error:
         logging.error(f"Error checking table existence: {error}")
         return False
+
+
+
+
+
+@app.get("/leads", response_model=List[Lead])
+async def get_leads():
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        select_query = sql.SQL('''
+            SELECT name, cc, phone, email, fee_quoted, batch_timing, description, lead_status, lead_source, stack, course, class_mode, next_followup , created_at
+            FROM public.leads;
+        ''')
+
+        cur.execute(select_query)
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+
+        leads = []
+        for row in rows:
+            lead = Lead(
+                name=row[0],
+                cc=row[1],
+                phone=row[2],
+                email=row[3],
+                fee_quoted=row[4],
+                batch_timing=row[5],
+                description=row[6],
+                lead_status=row[7],
+                lead_source=row[8],
+                stack=row[9],
+                course=row[10],
+                class_mode=row[11],
+                next_followup=row[12],
+                created_at=row[13]
+            )
+            leads.append(lead)
+
+        return leads
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
