@@ -49,6 +49,22 @@ class Client(BaseModel):
     email: str
     password: str
 
+
+class Lead(BaseModel):
+    name: str
+    cc : str
+    phone : int
+    email: str
+    fee_quoted: int
+    batch_timing: datetime
+    description: str
+    lead_status : str
+    lead_source : str
+    stack : str
+    course : str
+    class_mode : str
+    next_followup : datetime
+
 @app.post("/Insert client/")
 async def insert_client(client: Client):
     try:
@@ -162,3 +178,74 @@ async def check_client(client: Client):
     except (Exception, psycopg2.Error) as e:
         # print(f"Error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/Insert Leads")
+async def insert_lead(lead: Lead):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        if not check_table_exists("public", "leads"):
+            create_table_query = sql.SQL('''
+                CREATE TABLE public.leads (
+                    name VARCHAR(255),
+                    cc VARCHAR(255),
+                    phone INT,
+                    email VARCHAR(255),
+                    fee_quoted INT,
+                    batch_timing TIMESTAMP,
+                    description TEXT,
+                    lead_status VARCHAR(50),
+                    lead_source VARCHAR(50),
+                    stack VARCHAR(50),
+                    course VARCHAR(50),
+                    class_mode VARCHAR(50),
+                    next_followup TIMESTAMP
+                );
+            ''')
+            cur.execute(create_table_query)
+            conn.commit()
+
+        insert_query = sql.SQL('''
+            INSERT INTO public.leads (name, cc, phone, email, fee_quoted, batch_timing, description, lead_status, lead_source, stack, course, class_mode, next_followup)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s,%s, %s, %s, %s, %s)
+            ''')
+        
+        values = (
+            lead.name, lead.cc , lead.phone , lead.email , lead.fee_quoted, lead.batch_timing, lead.description, lead.lead_status , lead.lead_source , lead.stack , lead.course , lead.class_mode , lead.next_followup
+        )
+        
+
+        cur.execute(insert_query,values)
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        return {"message": f"Client {lead.name} added successfully"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+def check_table_exists(schema, table_name):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        query = sql.SQL(
+            "SELECT EXISTS ("
+            "SELECT FROM information_schema.tables "
+            "WHERE table_schema = %s AND table_name = %s);"
+        )
+        
+        cur.execute(query, (schema, table_name))
+        exists = cur.fetchone()[0]
+        cur.close()
+        conn.close()
+       
+        return exists
+    except (Exception, psycopg2.Error) as error:
+        logging.error(f"Error checking table existence: {error}")
+        return False
+
+
