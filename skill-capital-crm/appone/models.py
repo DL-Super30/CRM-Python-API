@@ -100,41 +100,44 @@ class CreateNewLead(models.Model):
     contact_no = models.BigIntegerField()
     email = models.EmailField(max_length=255)
     fee_coated = models.DecimalField(max_digits=10, decimal_places=2)
-    description = models.TextField()
-    date = models.DateField(default=timezone.now)
-
-    lead_source = models.CharField(
-        max_length=20,
-        choices=LEAD_SOURCE_CHOICES,
-        default='None',
-    )
-
     batch_timing = models.CharField(
         max_length=10,  # Adjusted max_length to fit the longest value
         choices=BATCH_TIMING_CHOICES,
         default='7AM_8AM',
     )
-
-    class_mode = models.CharField(
-        max_length=20,
-        choices=CLASS_MODE_CHOICES,
-        default='HYDClassRoom',
-    )
-
+    description = models.TextField()
+    
     lead_status = models.CharField(
         max_length=12,
         choices=LEAD_STATUS_CHOICES,
         default='None',
     )
 
+    lead_source = models.CharField(
+        max_length=20,
+        choices=LEAD_SOURCE_CHOICES,
+        default='None',
+    )
+    tech_stack = models.CharField(
+        max_length=20,  # Adjusted max_length to fit the longest value
+        choices=TECH_STACK_CHOICES,
+        default='CloudOps',
+    )
     courses = models.CharField(
         max_length=20,
         choices=COURSES_CHOICES,
         default='Angulaar',
     )
 
-    tech_stack = models.CharField(
-        max_length=20,  # Adjusted max_length to fit the longest value
-        choices=TECH_STACK_CHOICES,
-        default='CloudOps',
+    
+    class_mode = models.CharField(
+        max_length=20,
+        choices=CLASS_MODE_CHOICES,
+        default='HYDClassRoom',
     )
+    date = models.DateField(default=timezone.now)
+
+    
+
+   
+    
