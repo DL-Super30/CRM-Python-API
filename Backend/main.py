@@ -56,7 +56,7 @@ class Lead(BaseModel):
     phone : int
     email: str
     fee_quoted: int
-    batch_timing: datetime
+    batch_timing: str
     description: str
     lead_status : str
     lead_source : str
@@ -152,14 +152,14 @@ async def check_client(client: Client):
         conn = get_db_connection()
         cur = conn.cursor()
 
-        # print("Connecting to the database")
+        
         query = sql.SQL('''
             SELECT password FROM public.clients WHERE email = %s
         ''')
         cur.execute(query, (client.email,))
         result = cur.fetchone()
 
-        # print("Executing SQL query")
+        
         if not result:
             raise HTTPException(status_code=404, detail="Client not found")
 
@@ -189,19 +189,19 @@ async def insert_lead(lead: Lead):
         if not check_table_exists("public", "leads"):
             create_table_query = sql.SQL('''
                 CREATE TABLE public.leads (
-                    name VARCHAR(255),
-                    cc VARCHAR(255),
-                    phone INT,
-                    email VARCHAR(255),
-                    fee_quoted INT,
-                    batch_timing TIMESTAMP,
+                    name VARCHAR(255) NOT NULL,
+                    cc VARCHAR(255) NOT NULL,
+                    phone INT NOT NULL,
+                    email VARCHAR(255) NOT NULL,
+                    fee_quoted INT NOT NULL,
+                    batch_timing VARCHAR(50) NOT NULL,
                     description TEXT,
-                    lead_status VARCHAR(50),
-                    lead_source VARCHAR(50),
-                    stack VARCHAR(50),
-                    course VARCHAR(50),
-                    class_mode VARCHAR(50),
-                    next_followup TIMESTAMP
+                    lead_status VARCHAR(50) NOT NULL,
+                    lead_source VARCHAR(50) NOT NULL,
+                    stack VARCHAR(50) NOT NULL,
+                    course VARCHAR(50) NOT NULL,
+                    class_mode VARCHAR(50) NOT NULL,
+                    next_followup TIMESTAMP NOT NULL
                 );
             ''')
             cur.execute(create_table_query)
