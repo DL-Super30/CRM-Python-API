@@ -72,6 +72,15 @@ class Lead(BaseModel):
     next_followup : datetime
     created_at : datetime
 
+class getLead(BaseModel):
+    name: str
+    cc: str
+    phone: int
+    lead_status: str
+    stack : str
+    class_mode : str
+    created_at : datetime
+
 @app.post("/Insert client/")
 async def insert_client(client: Client):
     try:
@@ -264,14 +273,14 @@ def check_table_exists(schema, table_name):
 
 
 
-@app.get("/leads", response_model=List[Lead])
+@app.get("/leads", response_model=List[getLead])
 async def get_leads():
     try:
         conn = get_db_connection()
         cur = conn.cursor()
 
         select_query = sql.SQL('''
-            SELECT name, cc, phone, email, fee_quoted, batch_timing, description, lead_status, lead_source, stack, course, class_mode, next_followup , created_at
+            SELECT name, cc, phone, lead_status, stack, class_mode, created_at
             FROM public.leads;
         ''')
 
@@ -282,21 +291,14 @@ async def get_leads():
 
         leads = []
         for row in rows:
-            lead = Lead(
+            lead = getLead(
                 name=row[0],
                 cc=row[1],
                 phone=row[2],
-                email=row[3],
-                fee_quoted=row[4],
-                batch_timing=row[5],
-                description=row[6],
-                lead_status=row[7],
-                lead_source=row[8],
-                stack=row[9],
-                course=row[10],
-                class_mode=row[11],
-                next_followup=row[12],
-                created_at=row[13]
+                lead_status=row[3],
+                stack=row[4],
+                class_mode=row[5],
+                created_at=row[6]
             )
             leads.append(lead)
 
