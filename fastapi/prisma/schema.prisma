@@ -23,3 +23,34 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 }
+
+model Lead {
+  id        String   @id @default(cuid())
+  name      String
+  source    String   @default("website")
+  phone     String
+  email     String
+  status    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model LeadDetails {
+  id           String   @id @default(cuid())
+  leadId       String
+  name         String
+  cc           String
+  phone        String
+  email        String
+  feeQuoted    String
+  batchTiming  String
+  description  String
+  status       String
+  source       String   @default("website")
+  stack        String
+  course       String
+  classMode    String
+  nextFollowUp DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
+}

@@ -39,6 +39,29 @@ class UserLoginDto(BaseModel):
     email: str
     password: str
     
+class CreateLeadDto(BaseModel):
+    name: str
+    lead_source : str
+    phone : int
+    email: str
+    lead_status : str
+    
+class CreateLeadDetailsDto(BaseModel):
+    name: str
+    cc : str
+    phone : int
+    email: str
+    fee_quoted: int
+    description: str
+    lead_status : str
+    lead_source : str
+    stack : str
+    course : str
+    class_mode : str
+    next_followup : str
+    
+
+    
 @app.on_event("startup")
 def startup():
     logging.info("Connecting to the database...")
@@ -84,5 +107,65 @@ def get_my_details(token: str = Depends(JWTBearer())):
         return user
     except Exception as e:
         logging.error(f"Error creating user: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+    
+    
+    
+@app.post("/leads")
+def create_lead(dto: CreateLeadDto):
+    try:
+        lead = prisma.lead.create(
+            data={
+                "name": dto.name,
+                "lead_source": dto.lead_source if dto.lead_source else "website",
+                "phone": dto.phone,
+                "email": dto.email,
+                "lead_status": dto.lead_status.values(),
+            }
+        )
+        return lead
+    except Exception as e:
+        logging.error(f"Error creating lead: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
+@app.post("/lead-details")
+def create_lead_details(dto: CreateLeadDetailsDto):
+    try:
+        lead = prisma.lead.create(
+            data={
+                "name": dto.name,
+                "cc": dto.cc,
+                "phone": dto.phone,
+                "email": dto.email,
+                "fee_quoted": dto.fee_quoted,
+                "description": dto.description,
+                "lead_status": dto.lead_status,
+                "lead_source": dto.lead_source,
+                "stack": dto.stack,
+                "course": dto.course,
+                "class_mode": dto.class_mode,
+                "next_followup": dto.next_followup
+            }
+        )
+        return lead
+    except Exception as e:
+        logging.error(f"Error creating lead: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+    
+
+@app.get('/leads/count-per-hour')
+def get_leads_count_per_hour():
+    try:
+        query = """
+        SELECT EXTRACT(HOUR FROM "createdAt") AS hour, COUNT(*) AS count
+        FROM "Lead"
+        WHERE "createdAt"::date = CURRENT_DATE
+        GROUP BY hour
+        ORDER BY hour;
+        """
+        result =  prisma.query_raw(query)
+        return {int(row['hour']): int(row['count']) for row in result}
+    except Exception as e:
+        logging.error(f"Error getting leads count per hour: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
