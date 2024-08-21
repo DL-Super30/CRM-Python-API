@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request, Depends, status, Security
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import psycopg2
@@ -6,7 +6,12 @@ from psycopg2 import sql
 from passlib.context import CryptContext
 from fastapi.openapi.docs import get_swagger_ui_html
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
+import logging
+# from jose import JWTError, jwt
+# import secrets
+# import os
+
 
 app = FastAPI(docs_url=None)
 
