@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-3oxod-!n(41t(n+1tl6azopj-eq54@x&73vy-qr8t6f&e(#^52
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -86,7 +86,7 @@ WSGI_APPLICATION = 'CRM.wsgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "skill-capital-lead",
+        "NAME": "postgres",
         'USER': 'postgres',
         'PASSWORD': 'shivababa@123',
         'HOST': 'localhost',    
@@ -147,7 +147,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
-    "http://127.0.0.1.3000"
+    "http://127.0.0.1:3000"
 ]
 # CORS_ALLOWED_ORIGIN_REGEXES = [
 #     r"^https://\w+\.example\.com$",
