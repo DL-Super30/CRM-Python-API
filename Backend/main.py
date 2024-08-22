@@ -59,7 +59,7 @@ class Client(BaseModel):
 class Lead(BaseModel):
     name: str
     cc : str
-    phone : int
+    phone : str
     email: str
     fee_quoted: int
     batch_timing: str
@@ -75,7 +75,7 @@ class Lead(BaseModel):
 class getLead(BaseModel):
     name: str
     cc: str
-    phone: int
+    phone: str
     lead_status: str
     stack : str
     class_mode : str
@@ -207,7 +207,7 @@ async def insert_lead(lead: Lead):
                 CREATE TABLE public.leads (
                     name VARCHAR(255) NOT NULL,
                     cc VARCHAR(255) NOT NULL,
-                    phone INT NOT NULL,
+                    phone VARCHAR(20) NOT NULL,
                     email VARCHAR(255) NOT NULL,
                     fee_quoted INT NOT NULL,
                     batch_timing VARCHAR(50) NOT NULL,
