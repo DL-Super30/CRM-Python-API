@@ -205,6 +205,7 @@ async def insert_lead(lead: Lead):
         if not check_table_exists("public", "leads"):
             create_table_query = sql.SQL('''
                 CREATE TABLE public.leads (
+                    id UUID PRIMARY KEY,
                     name VARCHAR(255) NOT NULL,
                     cc VARCHAR(255) NOT NULL,
                     phone VARCHAR(20) NOT NULL,
@@ -225,13 +226,13 @@ async def insert_lead(lead: Lead):
             conn.commit()
 
         insert_query = sql.SQL('''
-            INSERT INTO public.leads (name, cc, phone, email, fee_quoted, batch_timing, description, lead_status, lead_source, stack, course, class_mode, next_followup, created_at)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s,%s, %s, %s, %s, %s,%s)
+            INSERT INTO public.leads (id, name, cc, phone, email, fee_quoted, batch_timing, description, lead_status, lead_source, stack, course, class_mode, next_followup, created_at)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s,%s, %s, %s, %s, %s,%s)
             ''')
-        
+        client_id = str(uuid.uuid4())
         created_at = datetime.now(timezone.utc)
 
-        values = (
+        values = ( client_id,
             lead.name, lead.cc , lead.phone , lead.email , lead.fee_quoted, lead.batch_timing, lead.description, 
             lead.lead_status , lead.lead_source , lead.stack , lead.course , lead.class_mode , lead.next_followup,
             created_at
