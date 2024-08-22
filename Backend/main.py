@@ -196,7 +196,7 @@ async def check_client(client: Client):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/leads")
+@app.post("/createleads")
 async def insert_lead(lead: Lead):
     try:
         conn = get_db_connection()
@@ -273,7 +273,7 @@ def check_table_exists(schema, table_name):
 
 
 
-@app.get("/leads", response_model=List[getLead])
+@app.get("/getleads", response_model=List[getLead])
 async def get_leads():
     try:
         conn = get_db_connection()
