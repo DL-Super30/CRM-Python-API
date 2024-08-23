@@ -85,7 +85,7 @@ class getlead(BaseModel):
     id : str
 
 #Inserting client.
-@app.post("/Insert client/")
+@app.post("/insert_client/")
 async def insert_client(client: Client):
     try:
         conn = get_db_connection()
@@ -316,7 +316,7 @@ async def get_leads():
     
 
 #Getting data for update lead. 
-@app.get("/getlead/{lead_id}", response_model=getlead)
+@app.get("/getlead_id/{lead_id}", response_model=getlead)
 async def get_lead(lead_id: str):
     try:
         conn = get_db_connection()
