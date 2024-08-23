@@ -420,7 +420,7 @@ async def update_lead(lead_id: str, lead: Lead):
 
 #Delete leads
 @app.delete("/deletelead/{lead_id}")
-async def delete_lead(lead_id: str,lead:Lead):
+async def delete_lead(lead_id: str):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
@@ -429,10 +429,11 @@ async def delete_lead(lead_id: str,lead:Lead):
             raise HTTPException(status_code=404, detail=str('No data to delete'))
 
         query = sql.SQL('''
-            SELECT id FROM public.leads WHERE id = %s
+            SELECT id,name FROM public.leads WHERE id = %s
         ''')
         cur.execute(query, (lead_id,))
         existing_lead = cur.fetchone()
+        id , name = existing_lead
 
         if not existing_lead:
             raise HTTPException(status_code=404, detail="Lead not found")
@@ -446,7 +447,7 @@ async def delete_lead(lead_id: str,lead:Lead):
         cur.close()
         conn.close()
 
-        return {"message": f"Lead {lead.name} deleted successfully"}
+        return {"message": f"Lead {name} deleted successfully"}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
