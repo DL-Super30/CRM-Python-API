@@ -273,8 +273,6 @@ def check_table_exists(schema, table_name):
         return False
 
 
-
-
 # Getting leads.
 @app.get("/getleads", response_model=List[getLead])
 async def get_leads():
@@ -313,9 +311,6 @@ async def get_leads():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
-
-
-
 
 #Getting all details for update lead. 
 @app.get("/getlead/{lead_id}", response_model=Lead)
@@ -418,6 +413,40 @@ async def update_lead(lead_id: str, lead: Lead):
         conn.close()
 
         return {"message": f"Lead {lead.name} updated successfully"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+
+#Delete leads
+@app.delete("/deletelead/{lead_id}")
+async def delete_lead(lead_id: str,lead:Lead):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        if not check_table_exists("public", "leads"):
+            raise HTTPException(status_code=404, detail=str('No data to delete'))
+
+        query = sql.SQL('''
+            SELECT id FROM public.leads WHERE id = %s
+        ''')
+        cur.execute(query, (lead_id,))
+        existing_lead = cur.fetchone()
+
+        if not existing_lead:
+            raise HTTPException(status_code=404, detail="Lead not found")
+
+        delete_query = sql.SQL('''
+            DELETE FROM public.leads WHERE id = %s
+        ''')
+        cur.execute(delete_query, (lead_id,))
+        conn.commit()
+
+        cur.close()
+        conn.close()
+
+        return {"message": f"Lead {lead.name} deleted successfully"}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
