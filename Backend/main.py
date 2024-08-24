@@ -73,6 +73,7 @@ class Lead(BaseModel):
     created_at : datetime
 
 class getLead(BaseModel):
+    id :str
     name: str
     cc: str
     phone: str
@@ -287,7 +288,7 @@ async def get_leads():
             raise HTTPException(status_code=404, detail=str('No data to display'))
 
         select_query = sql.SQL('''
-            SELECT name, cc, phone, lead_status, stack, class_mode, created_at
+            SELECT id,name, cc, phone, lead_status, stack, class_mode, created_at
             FROM public.leads;
         ''')
 
@@ -299,13 +300,14 @@ async def get_leads():
         leads = []
         for row in rows:
             lead = getLead(
-                name=row[0],
-                cc=row[1],
-                phone=row[2],
+                id=row[0],
+                name=row[1],
+                cc=row[2],
+                phone=row[3],
                 lead_status=row[3],
-                stack=row[4],
-                class_mode=row[5],
-                created_at=row[6]
+                stack=row[5],
+                class_mode=row[6],
+                created_at=row[7]
             )
             leads.append(lead)
 
@@ -314,39 +316,6 @@ async def get_leads():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
-
-#Getting data for update lead. 
-@app.get("/getlead_id/{lead_id}", response_model=getlead)
-async def get_lead(lead_id: str):
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-
-        if not check_table_exists("public", "leads"):
-            raise HTTPException(status_code=404, detail=str('No data to display'))
-
-        query = sql.SQL('''
-            SELECT id FROM public.leads
-            WHERE id = %s
-        ''')
-        cur.execute(query, (lead_id,))
-        lead = cur.fetchone()
-
-        if not lead:
-            raise HTTPException(status_code=404, detail="Lead not found")
-
-        lead_data = {
-            "id": lead[0]
-        }
-
-        cur.close()
-        conn.close()
-
-        return lead_data
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
 
 #update lead
 @app.put("/updatelead/{lead_id}")
