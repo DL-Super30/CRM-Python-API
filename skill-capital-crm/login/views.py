@@ -2,6 +2,7 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
+# from rest_framework import permissions
 from django.contrib.auth.models import User
 from .serializers import RegistrationSerializer, LoginSerializer
 
@@ -11,6 +12,7 @@ class RegistrationView(generics.CreateAPIView):
 
 class LoginView(generics.GenericAPIView):
     serializer_class = LoginSerializer
+    # permission_classes=[permissions.IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
