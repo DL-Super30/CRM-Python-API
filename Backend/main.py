@@ -253,7 +253,7 @@ async def insert_lead(lead: Lead):
         cur.close()
         conn.close()
 
-        return {"message": f"Client {lead.name} added successfully"}
+        return {"message": f"Lead {lead.name} added successfully"}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -361,7 +361,8 @@ async def update_lead(lead_id: str, lead: Lead):
                 stack = %s,
                 course = %s,
                 class_mode = %s,
-                next_followup = %s
+                next_followup = %s,
+                created_at =%s
             WHERE id = %s
         ''')
 
@@ -399,10 +400,11 @@ async def delete_lead(lead_id: str):
         ''')
         cur.execute(query, (lead_id,))
         existing_lead = cur.fetchone()
-        id , name = existing_lead
 
         if not existing_lead:
-            raise HTTPException(status_code=404, detail="Lead not found")
+            raise HTTPException(status_code=404, detail="Lead not found with that id")
+        
+        id , name = existing_lead
 
         delete_query = sql.SQL('''
             DELETE FROM public.leads WHERE id = %s
