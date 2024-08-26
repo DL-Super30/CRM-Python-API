@@ -70,7 +70,6 @@ class Lead(BaseModel):
     course : str
     class_mode : str
     next_followup : datetime
-    created_at : datetime
 
 class getLead(BaseModel):
     id: str
@@ -137,7 +136,7 @@ async def insert_client(client: Client):
                 ''')
 
             hashed_password = pwd_context.hash(client.password)
-            created_at = updated_at = datetime.utcnow()
+            created_at = updated_at = datetime.now(timezone.utc)
             insert_values = (client_id, client.email, hashed_password, created_at, updated_at)
 
             cur.execute(insert_query, insert_values)
