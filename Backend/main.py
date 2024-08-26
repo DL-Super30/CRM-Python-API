@@ -73,17 +73,21 @@ class Lead(BaseModel):
     created_at : datetime
 
 class getLead(BaseModel):
-    id :str
+    id: str
     name: str
     cc: str
     phone: str
+    email: str
+    fee_quoted: int
+    batch_timing: str
+    description: str
     lead_status: str
-    stack : str
-    class_mode : str
-    created_at : datetime
-
-class getlead(BaseModel):
-    id : str
+    lead_source: str
+    stack: str
+    course: str
+    class_mode: str
+    next_followup: datetime
+    created_at: datetime
 
 #Inserting client.
 @app.post("/insert_client/")
@@ -288,7 +292,7 @@ async def get_leads():
             raise HTTPException(status_code=404, detail=str('No data to display'))
 
         select_query = sql.SQL('''
-            SELECT id,name, cc, phone, lead_status, stack, class_mode, created_at
+            SELECT id, name, cc, phone, email, fee_quoted, batch_timing, description, lead_status, lead_source, stack, course, class_mode, next_followup, created_at
             FROM public.leads;
         ''')
 
@@ -304,10 +308,17 @@ async def get_leads():
                 name=row[1],
                 cc=row[2],
                 phone=row[3],
-                lead_status=row[3],
-                stack=row[5],
-                class_mode=row[6],
-                created_at=row[7]
+                email=row[4],
+                fee_quoted=row[5],
+                batch_timing=row[6],
+                description=row[7],
+                lead_status=row[8],
+                lead_source=row[9],
+                stack=row[10],
+                course=row[11],
+                class_mode=row[12],
+                next_followup=row[13],
+                created_at=row[14]
             )
             leads.append(lead)
 
