@@ -361,15 +361,16 @@ async def update_lead(lead_id: str, lead: Lead):
                 stack = %s,
                 course = %s,
                 class_mode = %s,
-                next_followup = %s,
-                created_at = %s
+                next_followup = %s
             WHERE id = %s
         ''')
+
+        created_at = datetime.now(timezone.utc)
 
         updated_values = (
             lead.name, lead.cc, lead.phone, lead.email, lead.fee_quoted,
             lead.batch_timing, lead.description, lead.lead_status, lead.lead_source,
-            lead.stack, lead.course, lead.class_mode, lead.next_followup, lead.created_at, lead_id
+            lead.stack, lead.course, lead.class_mode, lead.next_followup, created_at, lead_id
         )
 
         cur.execute(update_query, updated_values)
