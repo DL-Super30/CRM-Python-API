@@ -9,10 +9,17 @@ import uuid
 from datetime import datetime, timedelta, timezone
 import logging
 from typing import List
-# from jose import JWTError, jwt
-# import secrets
-# import os
+from jose import JWTError, jwt
+import secrets
+import os
+from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordRequestForm
 
+
+SECRET_KEY = os.getenv("SECRET_KEY", secrets.token_hex(32))
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 1
+REMEMBER_ME_EXPIRE_DAYS = 1
 
 app = FastAPI(docs_url=None)
 
@@ -55,6 +62,10 @@ class Client(BaseModel):
     email: str
     password: str
 
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    email: str
 
 class Lead(BaseModel):
     name: str
@@ -103,7 +114,7 @@ async def insert_client(client: Client):
             
             client_id = str(uuid.uuid4())
             hashed_password = pwd_context.hash(client.password)
-            created_at = updated_at = datetime.utcnow()
+            created_at = updated_at = datetime.now(timezone.utc)
             insert_values = (client_id, client.email, hashed_password, created_at, updated_at)
 
             cur.execute(insert_query, insert_values)
@@ -169,10 +180,19 @@ def check_table_exists(schema, table_name):
     except (Exception, psycopg2.Error) as error:
         print(f"Error checking table existence: {error}")
         return False
+    
+# Access token
+def create_access_token(data: dict, expires_delta: timedelta):
+    to_encode = data.copy()
+    expire = datetime.now(timezone.utc) + expires_delta
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
 
 #login authentication.
-@app.post('/login')
-async def check_client(client: Client):
+@app.post('/login', response_model=Token)
+async def check_client(request: Request, form_data: OAuth2PasswordRequestForm = Depends()):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
@@ -181,7 +201,7 @@ async def check_client(client: Client):
         query = sql.SQL('''
             SELECT password FROM public.clients WHERE email = %s
         ''')
-        cur.execute(query, (client.email,))
+        cur.execute(query, (form_data.username,))
         result = cur.fetchone()
 
         
@@ -192,17 +212,47 @@ async def check_client(client: Client):
         # print(stored_password)
 
         # print("Verifying password")
-        if not pwd_context.verify(client.password, stored_password):
+        if not pwd_context.verify(form_data.password, stored_password):
             raise HTTPException(status_code=400, detail="Incorrect password")
+
+        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = create_access_token(data={"sub": form_data.username}, expires_delta=access_token_expires)
 
         cur.close()
         conn.close()
 
-        return {"message": f"Client {client.email} authenticated successfully"}
+        return {"access_token": access_token, "token_type": "bearer", "email": form_data.username}
 
     except (Exception, psycopg2.Error) as e:
         # print(f"Error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+credentials_exception = HTTPException(
+    status_code=status.HTTP_401_UNAUTHORIZED, 
+    detail="Could not validate credentials",
+    headers={"WWW-Authenticate": "Bearer"},
+)
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")  
+
+def get_current_user(token: str = Depends(oauth2_scheme)):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            raise credentials_exception
+        return {"email": email}
+    except JWTError:
+        raise credentials_exception
+
+
+# Authorize clients
+@app.get("/users")
+async def read_users_me(current_user: dict = Security(get_current_user)):
+    return {"user": current_user}
+
+
 
 #Leads code
 @app.post("/createleads")
