@@ -18,6 +18,7 @@ class CreateNewLeadViewSet(viewsets.ModelViewSet):
     def destroy(self, request, pk=None):
         
         instance = self.get_object()
+        
         instance.delete()
 
         return response({'messsage':"Record delete successfully"},status=HTTP_204_NO_CONTENT)

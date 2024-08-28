@@ -20,15 +20,13 @@ class LoginView(generics.GenericAPIView):
         username = serializer.validated_data['username']
         password = serializer.validated_data['password']
         user = authenticate(username=username, password=password)
-        if user:
-         return Response({"message":"succes"},status=status.HTTP_200_OK)
-        else:
-         return Response({"message": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
-            
-
         # if user:
-        #     token, created = Token.objects.get_or_create(user=user)
-        #     return Response({"token": token.key, "message": "Login successful"}, status=status.HTTP_200_OK)
+        #  return Response({"message":"succes"},status=status.HTTP_200_OK)
         # else:
-        #     return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+        #  return Response({"message": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+        if user:
+            token, created = Token.objects.get_or_create(user=user)
+            return Response({"token": token.key, "message": "Login successful"}, status=status.HTTP_200_OK)
+        else:
+            return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
 
