@@ -20,4 +20,4 @@ class CreateNewLeadViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         instance.delete()
 
-        return response.Response({'messsage':"Record delete successfully"},status=HTTP_204_NO_CONTENT)
+        return response({'messsage':"Record delete successfully"},status=HTTP_204_NO_CONTENT)
