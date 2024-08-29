@@ -52,19 +52,19 @@ INSTALLED_APPS = [
 ]
 
 # Authentication settings
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-    ],
-    # 'DEFAULT_PERMISSION_CLASSES': [
-    #     'rest_framework.permissions.IsAuthenticated',
-    # ],
-    # 'DEFAULT_AUTHENTICATION_CLASSES': (
+# REST_FRAMEWORK = {
+#     'DEFAULT_AUTHENTICATION_CLASSES': [
+#         'rest_framework.authentication.TokenAuthentication',
+#     ],
+#     'DEFAULT_PERMISSION_CLASSES': [
+#         'rest_framework.permissions.IsAuthenticated',
+#     ],
+#     'DEFAULT_AUTHENTICATION_CLASSES': (
     
-    #     'rest_framework_simplejwt.authentication.JWTStatelessUserAuthentication',
-    # )
+#         'rest_framework_simplejwt.authentication.JWTStatelessUserAuthentication',
+#     )
     
-}
+# }
 
 
 MIDDLEWARE = [
