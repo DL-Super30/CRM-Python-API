@@ -14,6 +14,9 @@ from pathlib import Path
 # import pymysql
 # pymysql.install_as_MySQLdb()
 import psycopg2
+from datetime import timedelta
+from pathlib import Path
+
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -43,8 +46,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     "corsheaders",
-    'rest_framework.authtoken',
-    # 'rest_framework_simplejwt',
+    # 'rest_framework.authtoken',
+    'rest_framework_simplejwt',
     'login',
     'appone',
     'opportunties',
@@ -54,16 +57,16 @@ INSTALLED_APPS = [
 
 # Authentication settings
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-    ],
-#     'DEFAULT_PERMISSION_CLASSES': [
-#         'rest_framework.permissions.IsAuthenticated',
-#     ],
-    # 'DEFAULT_AUTHENTICATION_CLASSES': (
+    # 'DEFAULT_AUTHENTICATION_CLASSES': [
+    #     'rest_framework.authentication.TokenAuthentication',
+    # ],
+    # 'DEFAULT_PERMISSION_CLASSES': [
+    #     'rest_framework.permissions.IsAuthenticated',
+    # ],
+    'DEFAULT_AUTHENTICATION_CLASSES': (
     
-    #     'rest_framework_simplejwt.authentication.JWTStatelessUserAuthentication',
-    # )
+        'rest_framework_simplejwt.authentication.JWTStatelessUserAuthentication',
+    )
     
 }
 
@@ -186,3 +189,9 @@ CORS_ALLOW_CREDENTIALS = True
 
 # Or allow all origins (less secure)
 CORS_ALLOW_ALL_ORIGINS = True
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+}

@@ -6,11 +6,12 @@ from .serializers import OpportunitySerializer
 from .models import Opportunity
 from rest_framework import response # type: ignore
 from rest_framework.status import HTTP_204_NO_CONTENT # type: ignore
-# from rest_framework import permissions
+from rest_framework import permissions
 
 class OpportunityViewSet(viewsets.ModelViewSet):
     queryset = Opportunity.objects.all()
     serializer_class = OpportunitySerializer
+    permission_classes=[permissions.IsAuthenticated]
     
 def destroy(self, request, pk=None):
         
