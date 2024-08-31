@@ -1,27 +1,37 @@
-pipeline{
-    node any{
+pipeline {
+    agent any 
+        // This sets the pipeline to run on any available Jenkins agent
 
-    }
-    stages{
-        stage('Containers'){
-            steps{
-                sh 'docker container ls'
+    stages {
+        stage('Containers') {
+            steps {
+                script {
+                    // List Docker containers
+                    sh 'docker container ls'
+                }
             }
         }
-        stage('build'){
-            steps{
-                sh 'cd skill-capital-crm '
-                sh 'docker build -t django .'
+        stage('Build') {
+            steps {
+                script {
+                    // Change directory to skill-capital-crm and build Docker image
+                    dir('skill-capital-crm') {
+                        sh 'docker build -t django .'
+                    }
+                }
             }
         }
-        stage('deploy'){
-            steps{
-                sh 'docker contaienr run -dt --name djang0 -p 8000:8000 django '
+        stage('Deploy') {
+            steps {
+                script {
+                    // Run Docker container
+                    sh 'docker container run -dt --name django -p 8000:8000 django'
+                }
             }
         }
-        stage('output'){
-            steps{
-                echo 'succesfullt deployed in jenkins'
+        stage('Output') {
+            steps {
+                echo 'Successfully deployed in Jenkins'
             }
         }
     }
