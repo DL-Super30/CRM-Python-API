@@ -1,0 +1,28 @@
+pipeline{
+    node any{
+
+    }
+    stages{
+        stage('Containers'){
+            steps{
+                sh 'docker container ls'
+            }
+        }
+        stage('build'){
+            steps{
+                sh 'cd skill-capital-crm '
+                sh 'docker build -t django .'
+            }
+        }
+        stage('deploy'){
+            steps{
+                sh 'docker contaienr run -dt --name djang0 -p 8000:8000 django '
+            }
+        }
+        stage('output'){
+            steps{
+                echo 'succesfullt deployed in jenkins'
+            }
+        }
+    }
+}
