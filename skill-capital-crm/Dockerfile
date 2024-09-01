@@ -1,7 +1,7 @@
 FROM python:latest
 WORKDIR /app
 COPY . .
-RUN pip install -r requirement.txt
+RUN pip install -r requirements.txt
 COPY . .
 RUN python manage.py migrate
 EXPOSE 8000
