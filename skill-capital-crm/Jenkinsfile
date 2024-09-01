@@ -14,8 +14,9 @@ pipeline {
             steps {
                 script {
                     // Change directory to skill-capital-crm and build Docker image
-                    // Assuming the Dockerfile is in the root directory
-                    sh 'docker build -t django .'
+                    dir('skill-capital-crm') {
+                        sh 'docker build -t django .'
+                    }
                 }
             }
         }
