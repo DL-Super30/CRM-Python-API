@@ -3,35 +3,23 @@ pipeline {
         // This sets the pipeline to run on any available Jenkins agent
 
     stages {
-        stage('checkout SCM'){
-            steps{
-                checkout scm
-            }
-        }
         stage('Containers') {
             steps {
-                script {
                     // List Docker containers
-                    sh 'docker container ls'
-                }
+                    sh 'docker container ls '
             }
         }
         stage('Build') {
             steps {
-                script {
                     // Change directory to skill-capital-crm and build Docker image
-                    dir('skill-capital-crm') {
                         sh 'docker build -t django .'
-                    }
                 }
             }
         }
         stage('Deploy') {
             steps {
-                script {
                     // Run Docker container
-                    sh 'docker container run -dt --name django -p 8000:8000 django'
-                }
+                    sh 'docker container run -dt --name django -p 8000:8000 django '
             }
         }
         stage('Output') {
