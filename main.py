@@ -18,7 +18,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 SECRET_KEY = os.getenv("SECRET_KEY", secrets.token_hex(32))
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 1
+ACCESS_TOKEN_EXPIRE_MINUTES = 3
 
 app = FastAPI(docs_url=None)
 
@@ -252,9 +252,7 @@ async def check_client(request: Request, form_data: OAuth2PasswordRequestForm = 
             raise HTTPException(status_code=404, detail="Client not found")
 
         stored_password = result[0]
-        # print(stored_password)
-
-        # print("Verifying password")
+        
         if not pwd_context.verify(form_data.password, stored_password):
             raise HTTPException(status_code=400, detail="Incorrect password")
 
@@ -267,7 +265,6 @@ async def check_client(request: Request, form_data: OAuth2PasswordRequestForm = 
         return {"access_token": access_token, "token_type": "bearer", "email": form_data.username}
 
     except (Exception, psycopg2.Error) as e:
-        # print(f"Error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -299,7 +296,7 @@ async def read_users_me(current_user: dict = Security(get_current_user)):
 
 # Leads code
 @app.post("/createleads")
-async def insert_lead(lead: Lead):
+async def insert_lead(lead: Lead, current_user: dict = Depends(get_current_user)):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
@@ -353,7 +350,7 @@ async def insert_lead(lead: Lead):
 
 # Getting leads.
 @app.get("/getleads", response_model=List[getLead])
-async def get_leads():
+async def get_leads(current_user: dict = Depends(get_current_user)):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
@@ -399,7 +396,7 @@ async def get_leads():
     
 #update lead
 @app.put("/updatelead/{lead_id}")
-async def update_lead(lead_id: str, lead: Lead):
+async def update_lead(lead_id: str, lead: Lead, current_user: dict = Depends(get_current_user)):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
@@ -456,7 +453,7 @@ async def update_lead(lead_id: str, lead: Lead):
 
 #Delete leads
 @app.delete("/deletelead/{lead_id}")
-async def delete_lead(lead_id: str):
+async def delete_lead(lead_id: str, current_user: dict = Depends(get_current_user)):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
@@ -492,7 +489,7 @@ async def delete_lead(lead_id: str):
 
 # Create Opportunities
 @app.post("/createopportunity")
-async def insert_opportunity(opportunity: Opportunity):
+async def insert_opportunity(opportunity: Opportunity, current_user: dict = Depends(get_current_user)):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
@@ -557,7 +554,7 @@ async def insert_opportunity(opportunity: Opportunity):
 
 # Getting Opportunities
 @app.get("/getOpportunities", response_model=List[getOpportunity])
-async def get_opportunities():
+async def get_opportunities(current_user: dict = Depends(get_current_user)):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
@@ -611,7 +608,7 @@ async def get_opportunities():
 
 # Update Opportunities
 @app.put("/updateopportunity/{opportunity_id}")
-async def update_opportunity(opportunity_id: str, opportunity: Opportunity):
+async def update_opportunity(opportunity_id: str, opportunity: Opportunity, current_user: dict = Depends(get_current_user)):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
@@ -675,7 +672,7 @@ async def update_opportunity(opportunity_id: str, opportunity: Opportunity):
 
 # Delete Opportunities
 @app.delete("/deleteopportunity/{opportunity_id}")
-async def delete_opportunity(opportunity_id: str):
+async def delete_opportunity(opportunity_id: str, current_user: dict = Depends(get_current_user)):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
