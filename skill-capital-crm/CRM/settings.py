@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 from pathlib import Path
 # import pymysql
 # pymysql.install_as_MySQLdb()
-import psycopg2
+import psycopg2-binary
 from datetime import timedelta
 from pathlib import Path
 
