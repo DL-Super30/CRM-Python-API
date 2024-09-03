@@ -350,7 +350,7 @@ async def insert_lead(lead: Lead):
 
 # Getting leads.
 @app.get("/getleads", response_model=List[getLead])
-async def get_leads(current_user: dict = Depends(get_current_user)):
+async def get_leads():
     try:
         conn = get_db_connection()
         cur = conn.cursor()
