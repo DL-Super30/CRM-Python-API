@@ -296,7 +296,7 @@ async def read_users_me(current_user: dict = Security(get_current_user)):
 
 # Leads code
 @app.post("/createleads")
-async def insert_lead(lead: Lead, current_user: dict = Depends(get_current_user)):
+async def insert_lead(lead: Lead):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
@@ -396,7 +396,7 @@ async def get_leads(current_user: dict = Depends(get_current_user)):
     
 #update lead
 @app.put("/updatelead/{lead_id}")
-async def update_lead(lead_id: str, lead: Lead, current_user: dict = Depends(get_current_user)):
+async def update_lead(lead_id: str, lead: Lead):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
@@ -453,7 +453,7 @@ async def update_lead(lead_id: str, lead: Lead, current_user: dict = Depends(get
 
 #Delete leads
 @app.delete("/deletelead/{lead_id}")
-async def delete_lead(lead_id: str, current_user: dict = Depends(get_current_user)):
+async def delete_lead(lead_id: str):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
@@ -489,7 +489,7 @@ async def delete_lead(lead_id: str, current_user: dict = Depends(get_current_use
 
 # Create Opportunities
 @app.post("/createopportunity")
-async def insert_opportunity(opportunity: Opportunity, current_user: dict = Depends(get_current_user)):
+async def insert_opportunity(opportunity: Opportunity):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
@@ -554,7 +554,7 @@ async def insert_opportunity(opportunity: Opportunity, current_user: dict = Depe
 
 # Getting Opportunities
 @app.get("/getOpportunities", response_model=List[getOpportunity])
-async def get_opportunities(current_user: dict = Depends(get_current_user)):
+async def get_opportunities():
     try:
         conn = get_db_connection()
         cur = conn.cursor()
@@ -608,7 +608,7 @@ async def get_opportunities(current_user: dict = Depends(get_current_user)):
 
 # Update Opportunities
 @app.put("/updateopportunity/{opportunity_id}")
-async def update_opportunity(opportunity_id: str, opportunity: Opportunity, current_user: dict = Depends(get_current_user)):
+async def update_opportunity(opportunity_id: str, opportunity: Opportunity):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
@@ -672,7 +672,7 @@ async def update_opportunity(opportunity_id: str, opportunity: Opportunity, curr
 
 # Delete Opportunities
 @app.delete("/deleteopportunity/{opportunity_id}")
-async def delete_opportunity(opportunity_id: str, current_user: dict = Depends(get_current_user)):
+async def delete_opportunity(opportunity_id: str):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
