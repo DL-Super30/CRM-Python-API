@@ -140,6 +140,69 @@ class getOpportunity(BaseModel):
     course: str
     created_at:datetime
 
+class Learners(BaseModel):
+    first_name : str
+    id_proof : str
+    DOB : datetime
+    registered_date : str
+    batch_id : str
+    description : str
+    source : str
+    learner_owner : str
+    currency : str
+    counselling_done : str
+    lastname : str
+    phone : str
+    email : str 
+    location : str
+    alternate_phone : str
+    exchange_rate : str
+    attended_demo : str
+    learner_stage : str
+    lead_createdtime : str
+
+    registered_course : str
+    tech_stack : str
+    course_comments : str
+    slack_access : str
+    lms_access : str
+    preferrable_time : str
+    batch_timing : str
+    class_mode : str
+    comment : str
+
+class getLearners(BaseModel):
+    id : str
+    first_name : str
+    id_proof : str
+    DOB : datetime
+    registered_date : str
+    batch_id : str
+    description : str
+    source : str
+    learner_owner : str
+    currency : str
+    counselling_done : str
+    lastname : str
+    phone : str
+    email : str 
+    location : str
+    alternate_phone : str
+    exchange_rate : str
+    attended_demo : str
+    learner_stage : str
+    lead_createdtime : str
+
+    registered_course : str
+    tech_stack : str
+    course_comments : str
+    slack_access : str
+    lms_access : str
+    preferrable_time : str
+    batch_timing : str
+    class_mode : str
+    comment : str
+
 # Any Table Existence
 def check_table_exists(schema, table_name):
     try:
@@ -468,7 +531,7 @@ async def delete_lead(lead_id: str):
         existing_lead = cur.fetchone()
 
         if not existing_lead:
-            raise HTTPException(status_code=404, detail="Lead not found with that id")
+            raise HTTPException(status_code=404, detail="Lead not found")
         
         id , name = existing_lead
 
@@ -687,7 +750,7 @@ async def delete_opportunity(opportunity_id: str):
         existing_opportunity = cur.fetchone()
 
         if not existing_opportunity:
-            raise HTTPException(status_code=404, detail="Opportunity not found with that id")
+            raise HTTPException(status_code=404, detail="Opportunity not found")
         
         oppo_id, name = existing_opportunity
 
@@ -701,6 +764,257 @@ async def delete_opportunity(opportunity_id: str):
         conn.close()
 
         return {"message": f"Opportunity {name} deleted successfully"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Create Learner
+@app.post("/createLeaners")
+async def insert_learner(learner: Learners):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        if not check_table_exists("public", "learners"):
+            create_table_query = sql.SQL('''
+                CREATE TABLE public.learners (
+                    id UUID PRIMARY KEY,
+                    first_name VARCHAR(255) NOT NULL,
+                    id_proof VARCHAR(255) NOT NULL,
+                    DOB TIMESTAMP NOT NULL,
+                    registered_date VARCHAR(50) NOT NULL,
+                    batch_id VARCHAR(50) NOT NULL,
+                    description TEXT,
+                    source VARCHAR(50) NOT NULL,
+                    learner_owner VARCHAR(50) NOT NULL,
+                    currency VARCHAR(10) NOT NULL,
+                    counselling_done VARCHAR(10) NOT NULL,
+                    lastname VARCHAR(255) NOT NULL,
+                    phone VARCHAR(20) NOT NULL,
+                    email VARCHAR(255) NOT NULL,
+                    location VARCHAR(255) NOT NULL,
+                    alternate_phone VARCHAR(20),
+                    exchange_rate VARCHAR(10) NOT NULL,
+                    attended_demo VARCHAR(10) NOT NULL,
+                    learner_stage VARCHAR(50) NOT NULL,
+                    lead_createdtime VARCHAR(50) NOT NULL,
+                    registered_course VARCHAR(255) NOT NULL,
+                    tech_stack VARCHAR(255) NOT NULL,
+                    course_comments TEXT,
+                    slack_access VARCHAR(10) NOT NULL,
+                    lms_access VARCHAR(10) NOT NULL,
+                    preferrable_time VARCHAR(50) NOT NULL,
+                    batch_timing VARCHAR(50) NOT NULL,
+                    class_mode VARCHAR(50) NOT NULL,
+                    comment TEXT
+                );
+            ''')
+            cur.execute(create_table_query)
+            conn.commit()
+
+        insert_query = sql.SQL('''
+            INSERT INTO public.learners (
+                id, first_name, id_proof, DOB, registered_date, batch_id, description, source,
+                learner_owner, currency, counselling_done, lastname, phone, email, location,
+                alternate_phone, exchange_rate, attended_demo, learner_stage, lead_createdtime,
+                registered_course, tech_stack, course_comments, slack_access, lms_access,
+                preferrable_time, batch_timing, class_mode, comment
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        ''')
+
+        learner_id = str(uuid.uuid4())
+        values = (
+            learner_id, learner.first_name, learner.id_proof, learner.DOB, learner.registered_date, learner.batch_id,
+            learner.description, learner.source, learner.learner_owner, learner.currency, learner.counselling_done,
+            learner.lastname, learner.phone, learner.email, learner.location, learner.alternate_phone, learner.exchange_rate,
+            learner.attended_demo, learner.learner_stage, learner.lead_createdtime, learner.registered_course, learner.tech_stack,
+            learner.course_comments, learner.slack_access, learner.lms_access, learner.preferrable_time, learner.batch_timing,
+            learner.class_mode, learner.comment
+        )
+
+        cur.execute(insert_query, values)
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        return {"message": f"Learner {learner.first_name} added successfully"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+
+# Get Learners
+@app.get("/getlearners", response_model=List[getLearners])
+async def get_leaners():
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        if not check_table_exists("public", "learners"):
+            raise HTTPException(status_code=404, detail='No data to display')
+
+        select_query = sql.SQL('''
+            SELECT 
+                id, first_name, id_proof, DOB, registered_date, batch_id, description, source,
+                learner_owner, currency, counselling_done, lastname, phone, email, location,
+                alternate_phone, exchange_rate, attended_demo, learner_stage, lead_createdtime,
+                registered_course, tech_stack, course_comments, slack_access, lms_access,
+                preferrable_time, batch_timing, class_mode, comment
+            FROM public.learners;
+        ''')
+
+        cur.execute(select_query)
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+
+        learners = []
+        for row in rows:
+            learner = getLearners(
+                id=row[0],
+                first_name=row[1],
+                id_proof=row[2],
+                DOB=row[3],
+                registered_date=row[4],
+                batch_id=row[5],
+                description=row[6],
+                source=row[7],
+                learner_owner=row[8],
+                currency=row[9],
+                counselling_done=row[10],
+                lastname=row[11],
+                phone=row[12],
+                email=row[13],
+                location=row[14],
+                alternate_phone=row[15],
+                exchange_rate=row[16],
+                attended_demo=row[17],
+                learner_stage=row[18],
+                lead_createdtime=row[19],
+                registered_course=row[20],
+                tech_stack=row[21],
+                course_comments=row[22],
+                slack_access=row[23],
+                lms_access=row[24],
+                preferrable_time=row[25],
+                batch_timing=row[26],
+                class_mode=row[27],
+                comment=row[28]
+            )
+            learners.append(learner)
+
+        return learners
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+
+# Update Learner
+@app.put("/updatelearner/{learner_id}")
+async def update_leaner(learner_id: str, learner: Learners):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        if not check_table_exists("public", "learners"):
+            raise HTTPException(status_code=404, detail="No data to update")
+
+        query = sql.SQL('''
+            SELECT id FROM public.learners WHERE id = %s
+        ''')
+        cur.execute(query, (learner_id,))
+        existing_learner = cur.fetchone()
+
+        if not existing_learner:
+            raise HTTPException(status_code=404, detail="Learner not found")
+
+        update_query = sql.SQL('''
+            UPDATE public.learners
+            SET first_name = %s,
+                id_proof = %s,
+                DOB = %s,
+                registered_date = %s,
+                batch_id = %s,
+                description = %s,
+                source = %s,
+                learner_owner = %s,
+                currency = %s,
+                counselling_done = %s,
+                lastname = %s,
+                phone = %s,
+                email = %s,
+                location = %s,
+                alternate_phone = %s,
+                exchange_rate = %s,
+                attended_demo = %s,
+                learner_stage = %s,
+                lead_createdtime = %s,
+                registered_course = %s,
+                tech_stack = %s,
+                course_comments = %s,
+                slack_access = %s,
+                lms_access = %s,
+                preferrable_time = %s,
+                batch_timing = %s,
+                class_mode = %s,
+                comment = %s
+            WHERE id = %s
+        ''')
+
+        updated_values = (
+            learner.first_name, learner.id_proof, learner.DOB, learner.registered_date, learner.batch_id, 
+            learner.description, learner.source, learner.learner_owner, learner.currency, learner.counselling_done,
+            learner.lastname, learner.phone, learner.email, learner.location, learner.alternate_phone,
+            learner.exchange_rate, learner.attended_demo, learner.learner_stage, learner.lead_createdtime,
+            learner.registered_course, learner.tech_stack, learner.course_comments, learner.slack_access,
+            learner.lms_access, learner.preferrable_time, learner.batch_timing, learner.class_mode, learner.comment,
+            learner_id
+        )
+
+        cur.execute(update_query, updated_values)
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        return {"message": f"Learner {learner.first_name} updated successfully"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+
+# Delete Learner
+@app.delete("/deletelearner/{learner_id}")
+async def delete_learner(learner_id: str):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        if not check_table_exists("public", "learners"):
+            raise HTTPException(status_code=404, detail="No data to delete")
+
+        query = sql.SQL('''
+            SELECT id, first_name FROM public.learners WHERE id = %s
+        ''')
+        cur.execute(query, (learner_id,))
+        existing_learner = cur.fetchone()
+
+        if not existing_learner:
+            raise HTTPException(status_code=404, detail="Learner not found")
+
+        id, first_name = existing_learner
+
+        # Delete the learner
+        delete_query = sql.SQL('''
+            DELETE FROM public.learners WHERE id = %s
+        ''')
+        cur.execute(delete_query, (learner_id,))
+        conn.commit()
+
+        cur.close()
+        conn.close()
+
+        return {"message": f"Learner {first_name} deleted successfully"}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
