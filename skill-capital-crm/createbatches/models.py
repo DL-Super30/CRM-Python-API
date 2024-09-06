@@ -2,7 +2,7 @@ from django.db import models
 
 class CreateBatches(models.Model):
     name = models.CharField(max_length=100)
-    location = models.ForeignKey(on_delete=models.CASCADE)
+    location = models.ForeignKey()
     slot = models.CharField(max_length=100)
     trainer = models.CharField(max_length=100)
     timing = models.CharField(max_length=100)
