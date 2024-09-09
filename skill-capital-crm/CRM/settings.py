@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'opportunties',
     'learner',
     'createbatches',
+    'trainer',
     
 ]
 

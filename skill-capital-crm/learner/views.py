@@ -10,6 +10,7 @@ from rest_framework.status import HTTP_204_NO_CONTENT # type: ignore
 class LearnerViewSet(viewsets.ModelViewSet):
     queryset = Learner.objects.all()
     serializer_class = LearnerSerializer
+    # permission_classes = [permissions.IsAuthenticated]
 
 def destroy(self, request, pk=None):
         
