@@ -30,6 +30,7 @@ urlpatterns = [
     path('api/', include('learner.urls')),
     path('api/', include('createbatches.urls')),
     path('api/',include('trainer.urls')),
+    path('api/',include('courses.urls')),
     
     
 ]

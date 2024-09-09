@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'learner',
     'createbatches',
     'trainer',
+    'courses',
     
 ]
 
