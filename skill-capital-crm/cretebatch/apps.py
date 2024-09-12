@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class CreatebatchesConfig(AppConfig):
+class CretebatchConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
-    name = "createbatches"
+    name = "cretebatch"

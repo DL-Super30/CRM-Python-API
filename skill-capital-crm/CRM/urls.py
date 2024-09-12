@@ -28,7 +28,7 @@ urlpatterns = [
     path('api/', include('appone.urls')),
     path('api/', include('opportunties.urls')),
     path('api/', include('learner.urls')),
-    path('api/', include('createbatches.urls')),
+    path('api/', include('cretebatch.urls')),
     path('api/',include('trainer.urls')),
     path('api/',include('courses.urls')),
     

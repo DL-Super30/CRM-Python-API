@@ -53,7 +53,7 @@ INSTALLED_APPS = [
     'appone',
     'opportunties',
     'learner',
-    'createbatches',
+    'cretebatch',
     'trainer',
     'courses',
     

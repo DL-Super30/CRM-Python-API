@@ -1,10 +1,12 @@
 from django.db import models
-from django.utils import timezone
+
 
 class Location(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100,)
+    
+    
 
-    def __str__(self):
+def __str__(self):
         return self.name
 
 class Stack(models.Model):
@@ -14,8 +16,13 @@ class Stack(models.Model):
         return self.name
 
 class CreateBatches(models.Model):
+    Location_CHOICES = {
+        ('Hyderabad', 'Hyderabad'),
+          
+}
+
     name = models.CharField(max_length=100)
-    location = models.ForeignKey(Location, on_delete=models.CASCADE)  # Assuming a 'Location' model
+    location = models.ForeignKey(Location, on_delete=models.CASCADE,choices=Location_CHOICES, default='Hyderabd')  # Assuming a 'Location' model
     slot = models.CharField(max_length=100)
     trainer = models.CharField(max_length=100)
     timing = models.CharField(max_length=100)
@@ -28,11 +35,11 @@ class CreateBatches(models.Model):
     end_date = models.DateField()
     batch_status = models.CharField(max_length=50)
     topic_status = models.CharField(max_length=50)
-    no_of_students = models.IntegerField()
+    no_of_students = models.CharField(max_length=10)
     
     def __str__(self):
         return self.name
-    
+#month1,month2,month3
 class Batch(models.Model):
     date = models.DateField()
     topic = models.CharField(max_length=200)
