@@ -57,6 +57,9 @@ class Learner(models.Model):
     lead_status = models.CharField(max_length=50,
         choices=LEAD_STATUS_CHOICES,
         default='None',)
+    # stack =models.CharField(max_length=50)
+    # class_Mode = models.CharField(max_length=50)
+    # Description = models.CharField()
     opportunity_status = models.CharField(max_length=50)
     opportunity_stage = models.CharField(max_length=50)
     demo_attended_stage = models.CharField(max_length=50)
@@ -64,6 +67,7 @@ class Learner(models.Model):
     cold_lead_reason = models.CharField(max_length=255)
     next_followup = models.DateField(blank=True, null=True)
     lead_source = models.CharField(max_length=100)
+    course = models.CharField(max_length=100)
     
     def __str__(self):
         return self.name

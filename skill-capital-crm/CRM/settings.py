@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'cretebatch',
     'trainer',
     'courses',
+    'campaign',
     
 ]
 
@@ -194,7 +195,7 @@ CORS_ALLOW_CREDENTIALS = True
 # Or allow all origins (less secure)
 CORS_ALLOW_ALL_ORIGINS = True
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,

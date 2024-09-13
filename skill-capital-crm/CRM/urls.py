@@ -31,6 +31,7 @@ urlpatterns = [
     path('api/', include('cretebatch.urls')),
     path('api/',include('trainer.urls')),
     path('api/',include('courses.urls')),
+    path('api/',include('campaign.urls')),
     
     
 ]
