@@ -67,7 +67,7 @@ class Learner(models.Model):
     cold_lead_reason = models.CharField(max_length=255)
     next_followup = models.DateField(blank=True, null=True)
     lead_source = models.CharField(max_length=100)
-    course = models.CharField(max_length=100)
+    # course = models.CharField(max_length=100)
     
     def __str__(self):
         return self.name
