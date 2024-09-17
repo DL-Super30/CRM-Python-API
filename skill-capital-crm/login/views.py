@@ -1,5 +1,6 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
+from rest_framework.generics import GenericAPIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 # from rest_framework import permissions
@@ -10,6 +11,8 @@ from .serializers import RegistrationSerializer, LoginSerializer
 # myapp/views.py
 
 
+class API (GenericAPIView):
+    serializer_class=LoginSerializer
 class RegistrationView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = RegistrationSerializer

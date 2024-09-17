@@ -57,6 +57,8 @@ INSTALLED_APPS = [
     'trainer',
     'courses',
     'campaign',
+    'drf_yasg',
+    
     
 ]
 
