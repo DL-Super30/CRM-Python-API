@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Request, Depends, status, Security
+from fastapi import FastAPI, HTTPException, Request, Depends, status, Security ,Form
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import psycopg2
@@ -65,6 +65,11 @@ class Token(BaseModel):
     access_token: str
     token_type: str
     email: str
+
+class OAuth2EmailPasswordRequestForm:
+    def __init__(self, email: str = Form(...), password: str = Form(...)):
+        self.email = email
+        self.password = password
 
 class Lead(BaseModel):
     name: str
@@ -299,7 +304,7 @@ def create_access_token(data: dict, expires_delta: timedelta):
 
 #login authentication.
 @app.post('/login', response_model=Token)
-async def check_client(request: Request, form_data: OAuth2PasswordRequestForm = Depends()):
+async def check_client(form_data: OAuth2EmailPasswordRequestForm = Depends()):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
@@ -307,10 +312,9 @@ async def check_client(request: Request, form_data: OAuth2PasswordRequestForm = 
         query = sql.SQL('''
             SELECT password FROM public.clients WHERE email = %s
         ''')
-        cur.execute(query, (form_data.username,))
+        cur.execute(query, (form_data.email,))
         result = cur.fetchone()
 
-        
         if not result:
             raise HTTPException(status_code=404, detail="Client not found")
 
@@ -320,12 +324,12 @@ async def check_client(request: Request, form_data: OAuth2PasswordRequestForm = 
             raise HTTPException(status_code=400, detail="Incorrect password")
 
         access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-        access_token = create_access_token(data={"sub": form_data.username}, expires_delta=access_token_expires)
+        access_token = create_access_token(data={"sub": form_data.email}, expires_delta=access_token_expires)
 
         cur.close()
         conn.close()
 
-        return {"access_token": access_token, "token_type": "bearer", "email": form_data.username}
+        return {"access_token": access_token, "token_type": "bearer", "email": form_data.email}
 
     except (Exception, psycopg2.Error) as e:
         raise HTTPException(status_code=500, detail=str(e))
