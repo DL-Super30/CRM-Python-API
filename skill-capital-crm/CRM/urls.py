@@ -40,14 +40,15 @@ urlpatterns = [
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('api/login/', include('login.urls')),
-    path('api/leads/', include('appone.urls')),
-    path('api/opportuntie/', include('opportunties.urls')),
-    path('api/learner/', include('learner.urls')),
-    path('api/cretebatch/', include('cretebatch.urls')),
-    path('api/trainers/',include('trainer.urls')),
-    path('api/courses/',include('courses.urls')),
-    path('api/campaign/',include('campaign.urls')),
+    path('api/', include('login.urls')),
+    path('api/', include('appone.urls')),
+     path('api/', include('createlead.urls')),
+    path('api/', include('opportunties.urls')),
+    path('api/', include('learner.urls')),
+    path('api/', include('cretebatch.urls')),
+    path('api/',include('trainer.urls')),
+    path('api/',include('courses.urls')),
+    path('api/',include('campaign.urls')),
     
     
 ]
