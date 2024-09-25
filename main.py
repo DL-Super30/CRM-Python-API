@@ -291,6 +291,21 @@ class getTrainers(BaseModel):
     email : str
     location : str
 
+class Courses(BaseModel):
+    course_image : Optional[bytes] = b"00111100 01110011 01110110 01100111 00100000 01110111 01101001 01100100 01110100 01101000 00111101 00100010 00110111 00110110 00100010 00100000 01101000 01100101 01101001 01100111 01101000 01110100 00111101 00100010 00110111 00110110 00100010 00100000 01110110 01101001 01100101 01110111 01000010 01101111 01111000"
+    course_name : str
+    description : str
+    course_fee : str
+    course_brochure : str
+
+class getCourses(BaseModel):
+    id : str
+    course_image : bytes
+    course_name : str
+    description : str
+    course_fee : str
+    course_brochure : str
+
 # Any Table Existence
 def check_table_exists(schema, table_name):
     try:
@@ -321,25 +336,7 @@ async def insert_client(client: Client):
         conn = get_db_connection()
         cur = conn.cursor()
 
-        if check_table_exists("public", "clients"):
-            insert_query = sql.SQL('''
-                INSERT INTO public.clients (id, email, password, created_at, updated_at)
-                VALUES (%s, %s, %s, %s, %s)
-                ''')
-            
-            client_id = str(uuid.uuid4())
-            hashed_password = pwd_context.hash(client.password)
-            created_at = updated_at = datetime.now(timezone.utc)
-            insert_values = (client_id, client.email, hashed_password, created_at, updated_at)
-
-            cur.execute(insert_query, insert_values)
-            conn.commit()
-            cur.close()
-            conn.close()
-
-            return {"message": f"Client {client.email} added successfully"}
-            
-        else:
+        if not check_table_exists("public","clients"):
             create_table_query = sql.SQL('''
                 CREATE TABLE public.clients (
                     id UUID PRIMARY KEY,
@@ -355,22 +352,27 @@ async def insert_client(client: Client):
             cur.execute(create_table_query)
             conn.commit()
 
-            client_id = str(uuid.uuid4())
-            insert_query = sql.SQL('''
-                INSERT INTO public.clients (id, email, password, created_at, updated_at)
-                VALUES (%s, %s, %s, %s, %s)
-                ''')
+        insert_query = sql.SQL('''
+            INSERT INTO public.clients (id, email, password, created_at, updated_at)
+            VALUES (%s, %s, %s, %s, %s)
+            ''')
+        
+        client_id = str(uuid.uuid4())
 
-            hashed_password = pwd_context.hash(client.password)
-            created_at = updated_at = datetime.now(timezone.utc)
-            insert_values = (client_id, client.email, hashed_password, created_at, updated_at)
+        hashed_password = pwd_context.hash(client.password)
 
-            cur.execute(insert_query, insert_values)
-            conn.commit()
-            cur.close()
-            conn.close()
+        created_at = updated_at = datetime.now(timezone.utc)
 
-            return {"message": f"Client {client.email} added successfully"}
+        insert_values = (client_id, client.email, hashed_password, created_at, updated_at)
+
+        cur.execute(insert_query, insert_values)
+        conn.commit()
+
+        cur.close()
+        conn.close()
+
+
+        return {"message": f"Client '{client.email}' added successfully"}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -492,7 +494,7 @@ async def insert_lead(lead: Lead):
         cur.close()
         conn.close()
 
-        return {"message": f"Lead {lead.name} added successfully"}
+        return {"message": f"Lead '{lead.name}' added successfully"}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -595,7 +597,7 @@ async def update_lead(lead_id: str, lead: Lead):
         cur.close()
         conn.close()
 
-        return {"message": f"Lead {lead.name} updated successfully"}
+        return {"message": f"Lead '{lead.name}' updated successfully"}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -619,8 +621,6 @@ async def delete_lead(lead_id: str):
 
         if not existing_lead:
             raise HTTPException(status_code=404, detail="Lead not found")
-        
-        id , name = existing_lead
 
         delete_query = sql.SQL('''
             DELETE FROM public.leads WHERE id = %s
@@ -631,7 +631,7 @@ async def delete_lead(lead_id: str):
         cur.close()
         conn.close()
 
-        return {"message": f"Lead {name} deleted successfully"}
+        return {"message": f"Lead deleted successfully"}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -695,7 +695,7 @@ async def insert_opportunity(opportunity: Opportunity):
         cur.close()
         conn.close()
 
-        return {"message": f"Opportunity {opportunity.name} added successfully"}
+        return {"message": f"Opportunity '{opportunity.name}' added successfully"}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -814,7 +814,7 @@ async def update_opportunity(opportunity_id: str, opportunity: Opportunity):
         cur.close()
         conn.close()
 
-        return {"message": f"Opportunity {opportunity.name} updated successfully"}
+        return {"message": f"Opportunity '{opportunity.name}' updated successfully"}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -839,18 +839,17 @@ async def delete_opportunity(opportunity_id: str):
         if not existing_opportunity:
             raise HTTPException(status_code=404, detail="Opportunity not found")
         
-        oppo_id, name = existing_opportunity
 
         delete_query = sql.SQL('''
             DELETE FROM public.opportunities WHERE id = %s
         ''')
-        cur.execute(delete_query, (oppo_id,))
+        cur.execute(delete_query, (opportunity_id,))
         conn.commit()
 
         cur.close()
         conn.close()
 
-        return {"message": f"Opportunity {name} deleted successfully"}
+        return {"message": f"Opportunity deleted successfully"}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -925,7 +924,7 @@ async def insert_learner(learner: Learners):
         cur.close()
         conn.close()
 
-        return {"message": f"Learner {learner.first_name} added successfully"}
+        return {"message": f"Learner '{learner.first_name}' added successfully"}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -1064,7 +1063,7 @@ async def update_leaner(learner_id: str, learner: Learners):
         cur.close()
         conn.close()
 
-        return {"message": f"Learner {learner.first_name} updated successfully"}
+        return {"message": f"Learner '{learner.first_name}' updated successfully"}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -1088,9 +1087,6 @@ async def delete_learner(learner_id: str):
 
         if not existing_learner:
             raise HTTPException(status_code=404, detail="Learner not found")
-
-        id, first_name = existing_learner
-
         
         delete_query = sql.SQL('''
             DELETE FROM public.learners WHERE id = %s
@@ -1101,7 +1097,7 @@ async def delete_learner(learner_id: str):
         cur.close()
         conn.close()
 
-        return {"message": f"Learner {first_name} deleted successfully"}
+        return {"message": f"Learner deleted successfully"}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -1157,7 +1153,7 @@ async def insert_batch(batch: Batches):
         cur.close()
         conn.close()
 
-        return {"message": f"Batch {batch.batch_name} added successfully"}
+        return {"message": f"Batch '{batch.batch_name}' added successfully"}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -1261,7 +1257,7 @@ async def update_batch(batch_id: str, batch: Batches):
         cur.close()
         conn.close()
 
-        return {"message": f"Batch {batch.batch_name} updated successfully"}
+        return {"message": f"Batch '{batch.batch_name}' updated successfully"}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -1285,8 +1281,6 @@ async def delete_batch(batch_id: str):
 
         if not existing_batch:
             raise HTTPException(status_code=404, detail="Batch not found with that ID")
-        
-        batch_id, batch_name = existing_batch
 
         delete_query = sql.SQL('''
             DELETE FROM public.batches WHERE id = %s
@@ -1297,7 +1291,7 @@ async def delete_batch(batch_id: str):
         cur.close()
         conn.close()
 
-        return {"message": f"Batch {batch_name} deleted successfully"}
+        return {"message": f"Batch deleted successfully"}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -1342,7 +1336,7 @@ async def insert_month(month: Months):
         cur.close()
         conn.close()
 
-        return {"message": f"Month entry for {month.topic} added successfully"}
+        return {"message": f"Month entry for '{month.topic}' added successfully"}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -1426,7 +1420,7 @@ async def update_month(month_id: str, month: Months):
         cur.close()
         conn.close()
 
-        return {"message": f"Month entry {month.topic} updated successfully"}
+        return {"message": f"Month entry '{month.topic}' updated successfully"}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -1507,7 +1501,7 @@ async def insert_trainer(trainer: Trainers):
         cur.close()
         conn.close()
 
-        return {"message": f"Trainer {trainer.trainer_name} added successfully"}
+        return {"message": f"Trainer '{trainer.trainer_name}' added successfully"}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -1601,7 +1595,7 @@ async def update_trainer(trainer_id: str, trainer: Trainers):
         cur.close()
         conn.close()
 
-        return {"message": f"Trainer {trainer.trainer_name} updated successfully"}
+        return {"message": f"Trainer '{trainer.trainer_name}' updated successfully"}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -1632,6 +1626,163 @@ async def delete_trainer(trainer_id: str):
         conn.close()
 
         return {"message": f"Trainer deleted successfully"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Create Courses
+@app.post("/create_course")
+async def create_course(course: Courses):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        if not check_table_exists("public", "courses"):
+            create_table_query = sql.SQL('''
+                CREATE TABLE public.courses (
+                    id UUID PRIMARY KEY,
+                    course_image BYTEA NOT NULL,
+                    course_name VARCHAR(255) NOT NULL,
+                    description TEXT NOT NULL,
+                    course_fee VARCHAR(50) NOT NULL,
+                    course_brochure VARCHAR(255) NOT NULL
+                );
+            ''')
+            cur.execute(create_table_query)
+            conn.commit()
+
+        insert_query = sql.SQL('''
+            INSERT INTO public.courses (id, course_image, course_name, description, course_fee, course_brochure)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        ''')
+
+        course_id = str(uuid.uuid4())
+
+        values = (
+            course_id, course.course_image, course.course_name, course.description, course.course_fee, course.course_brochure
+        )
+
+        cur.execute(insert_query, values)
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        return {"message": f"Course '{course.course_name}' created successfully"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Get Courses
+@app.get("/get_courses", response_model=List[getCourses])
+async def get_courses():
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        if not check_table_exists("public", "courses"):
+            raise HTTPException(status_code=404, detail="No courses available")
+
+        select_query = sql.SQL('''
+            SELECT id, course_image, course_name, description, course_fee, course_brochure
+            FROM public.courses;
+        ''')
+
+        cur.execute(select_query)
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+
+        courses = []
+        for row in rows:
+            course_image = bytes(row[1]) if row[1] is not None else None
+
+            course = getCourses(
+                id=row[0],
+                course_image=course_image,
+                course_name=row[2],
+                description=row[3],
+                course_fee=row[4],
+                course_brochure=row[5]
+            )
+            courses.append(course)
+
+        return courses
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Update Courses
+@app.put("/update_course/{course_id}")
+async def update_course(course_id: str, course: Courses):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        check_query = sql.SQL('''
+            SELECT * FROM public.courses WHERE id = %s
+        ''')
+        cur.execute(check_query, (course_id,))
+        existing_course = cur.fetchone()
+
+        if existing_course is None:
+            raise HTTPException(status_code=404, detail="Course not found")
+
+        update_query = sql.SQL('''
+            UPDATE public.courses
+            SET course_image = %s,
+                course_name = %s,
+                description = %s,
+                course_fee = %s,
+                course_brochure = %s
+            WHERE id = %s
+        ''')
+
+        values = (
+            course.course_image,
+            course.course_name,
+            course.description,
+            course.course_fee,
+            course.course_brochure,
+            course_id
+        )
+
+        cur.execute(update_query, values)
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        return {"message": f"Course '{course.course_name}' updated successfully"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Delete Courses
+@app.delete("/delete_course/{course_id}")
+async def delete_course(course_id: str):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        check_query = sql.SQL('''
+            SELECT * FROM public.courses WHERE id = %s
+        ''')
+        cur.execute(check_query, (course_id,))
+        existing_course = cur.fetchone()
+
+        if existing_course is None:
+            raise HTTPException(status_code=404, detail="Course not found")
+        
+        delete_query = sql.SQL('''
+            DELETE FROM public.courses WHERE id = %s
+        ''')
+        cur.execute(delete_query, (course_id,))
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        return {"message": f"Course deleted successfully"}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
