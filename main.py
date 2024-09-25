@@ -208,6 +208,39 @@ class getLearners(BaseModel):
     class_mode : str
     comment : str
 
+class Batches(BaseModel):
+    batch_name : str
+    location : str
+    slot : str
+    trainer : str
+    batch_status : str
+    topic_status : str
+    no_of_students : str
+    learners : str
+    stack : str
+    start_time : datetime
+    tentative_end_time : str
+    class_mode : str
+    stage : str
+    comment : str
+
+class getBatches(BaseModel):
+    id : str
+    batch_name : str
+    location : str
+    slot : str
+    trainer : str
+    batch_status : str
+    topic_status : str
+    no_of_students : str
+    learners : str
+    stack : str
+    start_time : datetime
+    tentative_end_time : str
+    class_mode : str
+    stage : str
+    comment : str
+
 # Any Table Existence
 def check_table_exists(schema, table_name):
     try:
@@ -1008,7 +1041,7 @@ async def delete_learner(learner_id: str):
 
         id, first_name = existing_learner
 
-        # Delete the learner
+        
         delete_query = sql.SQL('''
             DELETE FROM public.learners WHERE id = %s
         ''')
@@ -1019,6 +1052,202 @@ async def delete_learner(learner_id: str):
         conn.close()
 
         return {"message": f"Learner {first_name} deleted successfully"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+
+# Create batch
+@app.post("/createbatch")
+async def insert_batch(batch: Batches):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        
+        if not check_table_exists("public", "batches"):
+            create_table_query = sql.SQL('''
+                CREATE TABLE public.batches (
+                    id UUID PRIMARY KEY,
+                    batch_name VARCHAR(255) NOT NULL,
+                    location VARCHAR(255) NOT NULL,
+                    slot VARCHAR(50) NOT NULL,
+                    trainer VARCHAR(255) NOT NULL,
+                    batch_status VARCHAR(50) NOT NULL,
+                    topic_status VARCHAR(50) NOT NULL,
+                    no_of_students VARCHAR(50) NOT NULL,
+                    learners TEXT,
+                    stack VARCHAR(50) NOT NULL,
+                    start_time TIMESTAMP NOT NULL,
+                    tentative_end_time VARCHAR(50) NOT NULL,
+                    class_mode VARCHAR(50) NOT NULL,
+                    stage VARCHAR(50) NOT NULL,
+                    comment TEXT
+                );
+            ''')
+            cur.execute(create_table_query)
+            conn.commit()
+
+        
+        insert_query = sql.SQL('''
+            INSERT INTO public.batches (id, batch_name, location, slot, trainer, batch_status, topic_status, no_of_students, learners, stack, start_time, tentative_end_time, class_mode, stage, comment)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        ''')
+
+        batch_id = str(uuid.uuid4())
+        start_time = datetime.now(timezone.utc)
+
+        values = (
+            batch_id,batch.batch_name, batch.location, batch.slot, batch.trainer, batch.batch_status, 
+            batch.topic_status, batch.no_of_students, batch.learners, batch.stack, batch.start_time, 
+            batch.tentative_end_time, batch.class_mode, batch.stage, batch.comment
+        )
+        cur.execute(insert_query, values)
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        return {"message": f"Batch {batch.batch_name} added successfully"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Get Batches
+@app.get("/getbatches", response_model=List[getBatches])
+async def get_batches():
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        # Check if the table exists
+        if not check_table_exists("public", "batches"):
+            raise HTTPException(status_code=404, detail="No batches available")
+
+        # Fetch all batch details
+        select_query = sql.SQL('''
+            SELECT id, batch_name, location, slot, trainer, batch_status, topic_status, no_of_students, learners, stack, start_time, tentative_end_time, class_mode, stage, comment
+            FROM public.batches;
+        ''')
+
+        cur.execute(select_query)
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+
+        batches = []
+        for row in rows:
+            batch = getBatches(
+                id=row[0],
+                batch_name=row[1],
+                location=row[2],
+                slot=row[3],
+                trainer=row[4],
+                batch_status=row[5],
+                topic_status=row[6],
+                no_of_students=row[7],
+                learners=row[8],
+                stack=row[9],
+                start_time=row[10],
+                tentative_end_time=row[11],
+                class_mode=row[12],
+                stage=row[13],
+                comment=row[14]
+            )
+            batches.append(batch)
+
+        return batches
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Update batches
+@app.put("/updatebatch/{batch_id}")
+async def update_batch(batch_id: str, batch: Batches):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        if not check_table_exists("public", "batches"):
+            raise HTTPException(status_code=404, detail="No data to update")
+        
+        query = sql.SQL('''
+            SELECT id FROM public.batches WHERE id = %s
+        ''')
+        cur.execute(query, (batch_id,))
+        existing_batch = cur.fetchone()
+
+        if not existing_batch:
+            raise HTTPException(status_code=404, detail="Batch not found")
+
+        update_query = sql.SQL('''
+            UPDATE public.batches
+            SET batch_name = %s,
+                location = %s,
+                slot = %s,
+                trainer = %s,
+                batch_status = %s,
+                topic_status = %s,
+                no_of_students = %s,
+                learners = %s,
+                stack = %s,
+                start_time = %s,
+                tentative_end_time = %s,
+                class_mode = %s,
+                stage = %s,
+                comment = %s
+            WHERE id = %s
+        ''')
+
+        updated_values = (
+            batch.batch_name, batch.location, batch.slot, batch.trainer,
+            batch.batch_status, batch.topic_status, batch.no_of_students,
+            batch.learners, batch.stack, batch.start_time, batch.tentative_end_time,
+            batch.class_mode, batch.stage, batch.comment, batch_id
+        )
+
+        cur.execute(update_query, updated_values)
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        return {"message": f"Batch {batch.batch_name} updated successfully"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Delete batch
+@app.delete("/deletebatch/{batch_id}")
+async def delete_batch(batch_id: str):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        if not check_table_exists("public", "batches"):
+            raise HTTPException(status_code=404, detail="No data to delete")
+
+        query = sql.SQL('''
+            SELECT id, batch_name FROM public.batches WHERE id = %s
+        ''')
+        cur.execute(query, (batch_id,))
+        existing_batch = cur.fetchone()
+
+        if not existing_batch:
+            raise HTTPException(status_code=404, detail="Batch not found with that ID")
+        
+        batch_id, batch_name = existing_batch
+
+        delete_query = sql.SQL('''
+            DELETE FROM public.batches WHERE id = %s
+        ''')
+        cur.execute(delete_query, (batch_id,))
+        conn.commit()
+
+        cur.close()
+        conn.close()
+
+        return {"message": f"Batch {batch_name} deleted successfully"}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
