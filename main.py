@@ -262,6 +262,34 @@ class getMonths(BaseModel):
     vedio_upload : Optional[bool] = False
     duration : Optional[str] = None
 
+class Trainers(BaseModel):
+    trainer_name : str
+    description : str
+    id_proof : str
+    trainer_status : str
+    batches : str
+    batch_stage : str
+    trainer_owner : str
+    free_slots : str
+    tech_stack : str
+    phone : str
+    email : str
+    location : str
+
+class getTrainers(BaseModel):
+    id : str
+    trainer_name : str
+    description : str
+    id_proof : str
+    trainer_status : str
+    batches : str
+    batch_stage : str
+    trainer_owner : str
+    free_slots : str
+    tech_stack : str
+    phone : str
+    email : str
+    location : str
 
 # Any Table Existence
 def check_table_exists(schema, table_name):
@@ -417,7 +445,7 @@ async def read_users_me(current_user: dict = Security(get_current_user)):
 
 
 # Leads code
-@app.post("/createleads")
+@app.post("/create_leads")
 async def insert_lead(lead: Lead):
     try:
         conn = get_db_connection()
@@ -471,7 +499,7 @@ async def insert_lead(lead: Lead):
 
 
 # Getting leads.
-@app.get("/getleads", response_model=List[getLead])
+@app.get("/get_leads", response_model=List[getLead])
 async def get_leads():
     try:
         conn = get_db_connection()
@@ -517,7 +545,7 @@ async def get_leads():
         raise HTTPException(status_code=500, detail=str(e))
     
 #update lead
-@app.put("/updatelead/{lead_id}")
+@app.put("/update_lead/{lead_id}")
 async def update_lead(lead_id: str, lead: Lead):
     try:
         conn = get_db_connection()
@@ -574,7 +602,7 @@ async def update_lead(lead_id: str, lead: Lead):
     
 
 #Delete leads
-@app.delete("/deletelead/{lead_id}")
+@app.delete("/delete_lead/{lead_id}")
 async def delete_lead(lead_id: str):
     try:
         conn = get_db_connection()
@@ -610,7 +638,7 @@ async def delete_lead(lead_id: str):
 
 
 # Create Opportunities
-@app.post("/createopportunity")
+@app.post("/create_opportunity")
 async def insert_opportunity(opportunity: Opportunity):
     try:
         conn = get_db_connection()
@@ -675,7 +703,7 @@ async def insert_opportunity(opportunity: Opportunity):
 
 
 # Getting Opportunities
-@app.get("/getOpportunities", response_model=List[getOpportunity])
+@app.get("/get_Opportunities", response_model=List[getOpportunity])
 async def get_opportunities():
     try:
         conn = get_db_connection()
@@ -729,7 +757,7 @@ async def get_opportunities():
     
 
 # Update Opportunities
-@app.put("/updateopportunity/{opportunity_id}")
+@app.put("/update_opportunity/{opportunity_id}")
 async def update_opportunity(opportunity_id: str, opportunity: Opportunity):
     try:
         conn = get_db_connection()
@@ -793,7 +821,7 @@ async def update_opportunity(opportunity_id: str, opportunity: Opportunity):
     
 
 # Delete Opportunities
-@app.delete("/deleteopportunity/{opportunity_id}")
+@app.delete("/delete_opportunity/{opportunity_id}")
 async def delete_opportunity(opportunity_id: str):
     try:
         conn = get_db_connection()
@@ -829,7 +857,7 @@ async def delete_opportunity(opportunity_id: str):
 
 
 # Create Learner
-@app.post("/createLeaners")
+@app.post("/create_Leaners")
 async def insert_learner(learner: Learners):
     try:
         conn = get_db_connection()
@@ -904,7 +932,7 @@ async def insert_learner(learner: Learners):
     
 
 # Get Learners
-@app.get("/getlearners", response_model=List[getLearners])
+@app.get("/get_learners", response_model=List[getLearners])
 async def get_leaners():
     try:
         conn = get_db_connection()
@@ -970,7 +998,7 @@ async def get_leaners():
     
 
 # Update Learner
-@app.put("/updatelearner/{learner_id}")
+@app.put("/update_learner/{learner_id}")
 async def update_leaner(learner_id: str, learner: Learners):
     try:
         conn = get_db_connection()
@@ -1043,7 +1071,7 @@ async def update_leaner(learner_id: str, learner: Learners):
     
 
 # Delete Learner
-@app.delete("/deletelearner/{learner_id}")
+@app.delete("/delete_learner/{learner_id}")
 async def delete_learner(learner_id: str):
     try:
         conn = get_db_connection()
@@ -1080,7 +1108,7 @@ async def delete_learner(learner_id: str):
     
 
 # Create batch
-@app.post("/createbatch")
+@app.post("/create_batch")
 async def insert_batch(batch: Batches):
     try:
         conn = get_db_connection()
@@ -1135,7 +1163,7 @@ async def insert_batch(batch: Batches):
         raise HTTPException(status_code=500, detail=str(e))
 
 # Get Batches
-@app.get("/getbatches", response_model=List[getBatches])
+@app.get("/get_batches", response_model=List[getBatches])
 async def get_batches():
     try:
         conn = get_db_connection()
@@ -1184,7 +1212,7 @@ async def get_batches():
 
 
 # Update batches
-@app.put("/updatebatch/{batch_id}")
+@app.put("/update_batch/{batch_id}")
 async def update_batch(batch_id: str, batch: Batches):
     try:
         conn = get_db_connection()
@@ -1240,7 +1268,7 @@ async def update_batch(batch_id: str, batch: Batches):
 
 
 # Delete batch
-@app.delete("/deletebatch/{batch_id}")
+@app.delete("/delete_batch/{batch_id}")
 async def delete_batch(batch_id: str):
     try:
         conn = get_db_connection()
@@ -1321,7 +1349,7 @@ async def insert_month(month: Months):
     
 
 # Get Month
-@app.get("/getmonths", response_model=List[getMonths])
+@app.get("/get_months", response_model=List[getMonths])
 async def get_months():
     try:
         conn = get_db_connection()
@@ -1404,7 +1432,7 @@ async def update_month(month_id: str, month: Months):
         raise HTTPException(status_code=500, detail=str(e))
     
 # Delete month
-@app.delete("/deletemonth/{month_id}")
+@app.delete("/delete_month/{month_id}")
 async def delete_month(month_id: str):
     try:
         conn = get_db_connection()
@@ -1429,6 +1457,181 @@ async def delete_month(month_id: str):
         conn.close()
 
         return {"message": f"Month entry deleted successfully"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Create Trainers
+@app.post("/create_trainer")
+async def insert_trainer(trainer: Trainers):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        if not check_table_exists("public", "trainers"):
+            create_table_query = sql.SQL('''
+                CREATE TABLE public.trainers (
+                    id UUID PRIMARY KEY,
+                    trainer_name VARCHAR(255) NOT NULL,
+                    description TEXT NOT NULL,
+                    id_proof VARCHAR(255) NOT NULL,
+                    trainer_status VARCHAR(50) NOT NULL,
+                    batches VARCHAR(255) NOT NULL,
+                    batch_stage VARCHAR(50) NOT NULL,
+                    trainer_owner VARCHAR(255) NOT NULL,
+                    free_slots VARCHAR(50) NOT NULL,
+                    tech_stack VARCHAR(255) NOT NULL,
+                    phone VARCHAR(20) NOT NULL,
+                    email VARCHAR(255) NOT NULL,
+                    location VARCHAR(255) NOT NULL
+                );
+            ''')
+            cur.execute(create_table_query)
+            conn.commit()
+
+        insert_query = sql.SQL('''
+            INSERT INTO public.trainers (id, trainer_name, description, id_proof, trainer_status, batches, batch_stage, trainer_owner, free_slots, tech_stack, phone, email, location)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        ''')
+
+        trainer_id = str(uuid.uuid4())
+
+        values = (
+            trainer_id, trainer.trainer_name, trainer.description, trainer.id_proof, trainer.trainer_status, 
+            trainer.batches, trainer.batch_stage, trainer.trainer_owner, trainer.free_slots, 
+            trainer.tech_stack, trainer.phone, trainer.email, trainer.location
+        )
+        cur.execute(insert_query, values)
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        return {"message": f"Trainer {trainer.trainer_name} added successfully"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Get Trainers
+@app.get("/get_trainers", response_model=List[getTrainers])
+async def get_trainers():
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        if not check_table_exists("public", "trainers"):
+            raise HTTPException(status_code=404, detail="No trainers available")
+
+        select_query = sql.SQL('''
+            SELECT id, trainer_name, description, id_proof, trainer_status, batches, batch_stage, trainer_owner, free_slots, tech_stack, phone, email, location
+            FROM public.trainers;
+        ''')
+
+        cur.execute(select_query)
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+
+        trainers = []
+        for row in rows:
+            trainer = getTrainers(
+                id=row[0],
+                trainer_name=row[1],
+                description=row[2],
+                id_proof=row[3],
+                trainer_status=row[4],
+                batches=row[5],
+                batch_stage=row[6],
+                trainer_owner=row[7],
+                free_slots=row[8],
+                tech_stack=row[9],
+                phone=row[10],
+                email=row[11],
+                location=row[12]
+            )
+            trainers.append(trainer)
+
+        return trainers
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+
+# Update trainer
+@app.put("/update_trainer/{trainer_id}")
+async def update_trainer(trainer_id: str, trainer: Trainers):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        check_query = sql.SQL('''
+            SELECT * FROM public.trainers WHERE id = %s
+        ''')
+        cur.execute(check_query, (trainer_id,))
+        existing_trainer = cur.fetchone()
+
+        if existing_trainer is None:
+            raise HTTPException(status_code=404, detail="Trainer not found")
+
+        update_query = sql.SQL('''
+            UPDATE public.trainers
+            SET trainer_name = %s,
+                description = %s,
+                id_proof = %s,
+                trainer_status = %s,
+                batches = %s,
+                batch_stage = %s,
+                trainer_owner = %s,
+                free_slots = %s,
+                tech_stack = %s,
+                phone = %s,
+                email = %s,
+                location = %s
+            WHERE id = %s
+        ''')
+
+        values = (
+            trainer.trainer_name, trainer.description, trainer.id_proof, trainer.trainer_status, trainer.batches, trainer.batch_stage, 
+            trainer.trainer_owner, trainer.free_slots, trainer.tech_stack, trainer.phone, trainer.email, trainer.location, trainer_id
+        )
+        cur.execute(update_query, values)
+        conn.commit()
+
+        cur.close()
+        conn.close()
+
+        return {"message": f"Trainer {trainer.trainer_name} updated successfully"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Delete trainer 
+@app.delete("/delete_trainer/{trainer_id}")
+async def delete_trainer(trainer_id: str):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        check_query = sql.SQL('''
+            SELECT * FROM public.trainers WHERE id = %s
+        ''')
+        cur.execute(check_query, (trainer_id,))
+        existing_trainer = cur.fetchone()
+
+        if existing_trainer is None:
+            raise HTTPException(status_code=404, detail="Trainer not found")
+
+        delete_query = sql.SQL('''
+            DELETE FROM public.trainers WHERE id = %s
+        ''')
+        cur.execute(delete_query, (trainer_id,))
+        conn.commit()
+
+        cur.close()
+        conn.close()
+
+        return {"message": f"Trainer deleted successfully"}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
