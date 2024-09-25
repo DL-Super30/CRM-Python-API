@@ -2,18 +2,19 @@ from fastapi import FastAPI, HTTPException, Request, Depends, status, Security ,
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import psycopg2
-from psycopg2 import sql
+from psycopg2 import Date, sql
 from passlib.context import CryptContext
 from fastapi.openapi.docs import get_swagger_ui_html
 import uuid
 from datetime import datetime, timedelta, timezone
 import logging
-from typing import List
+from typing import List, Optional
 from jose import JWTError, jwt
 import secrets
 import os
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.security import OAuth2PasswordRequestForm
+from datetime import time, date
 
 
 SECRET_KEY = os.getenv("SECRET_KEY", secrets.token_hex(32))
@@ -240,6 +241,27 @@ class getBatches(BaseModel):
     class_mode : str
     stage : str
     comment : str
+
+
+class Months(BaseModel):
+    date : date
+    topic : str
+    start_time : time
+    end_time : time
+    attendance : str
+    vedio_upload : Optional[bool] = False
+    duration : Optional[str] = ''
+
+class getMonths(BaseModel):
+    id : str
+    date : date
+    topic : str
+    start_time : time
+    end_time : time
+    attendance : str
+    vedio_upload : Optional[bool] = False
+    duration : Optional[str] = None
+
 
 # Any Table Existence
 def check_table_exists(schema, table_name):
@@ -1248,6 +1270,165 @@ async def delete_batch(batch_id: str):
         conn.close()
 
         return {"message": f"Batch {batch_name} deleted successfully"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Create month
+@app.post("/create_month")
+async def insert_month(month: Months):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        if not check_table_exists("public", "months"):
+            create_table_query = sql.SQL('''
+                CREATE TABLE public.months (
+                    id UUID PRIMARY KEY,
+                    date TIMESTAMP NOT NULL,
+                    topic VARCHAR(255) NOT NULL,
+                    start_time TIME NOT NULL,
+                    end_time TIME NOT NULL,
+                    attendance VARCHAR(255) NOT NULL,
+                    vedio_upload BOOLEAN DEFAULT FALSE,
+                    duration VARCHAR(50)
+                );
+            ''')
+            cur.execute(create_table_query)
+            conn.commit()
+
+        insert_query = sql.SQL('''
+            INSERT INTO public.months (id, date, topic, start_time, end_time, attendance, vedio_upload, duration)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        ''')
+
+        month_id = str(uuid.uuid4())
+
+        values = (
+            month_id, month.date, month.topic, month.start_time, month.end_time, 
+            month.attendance, month.vedio_upload, month.duration
+        )
+        cur.execute(insert_query, values)
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        return {"message": f"Month entry for {month.topic} added successfully"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+
+# Get Month
+@app.get("/getmonths", response_model=List[getMonths])
+async def get_months():
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        if not check_table_exists("public", "months"):
+            raise HTTPException(status_code=404, detail="No months available")
+
+        select_query = sql.SQL('''
+            SELECT id, date, topic, start_time, end_time, attendance, vedio_upload, duration
+            FROM public.months;
+        ''')
+
+        cur.execute(select_query)
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+
+        months = []
+        for row in rows:
+            month = getMonths(
+                id=row[0],
+                date=row[1].date(),
+                topic=row[2],
+                start_time=row[3],
+                end_time=row[4],
+                attendance=row[5],
+                vedio_upload=row[6],
+                duration=row[7]
+            )
+            months.append(month)
+
+        return months
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Update Month
+@app.put("/update_month/{month_id}")
+async def update_month(month_id: str, month: Months):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        check_query = sql.SQL('''
+            SELECT * FROM public.months WHERE id = %s
+        ''')
+        cur.execute(check_query, (month_id,))
+        existing_entry = cur.fetchone()
+
+        if existing_entry is None:
+            raise HTTPException(status_code=404, detail="Month entry not found")
+
+        update_query = sql.SQL('''
+            UPDATE public.months
+            SET date = %s,
+                topic = %s,
+                start_time = %s,
+                end_time = %s,
+                attendance = %s,
+                vedio_upload = %s,
+                duration = %s
+            WHERE id = %s
+        ''')
+
+        values = (
+            month.date, month.topic, month.start_time, month.end_time,
+            month.attendance, month.vedio_upload, month.duration, month_id
+        )
+        cur.execute(update_query, values)
+        conn.commit()
+
+        cur.close()
+        conn.close()
+
+        return {"message": f"Month entry {month.topic} updated successfully"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+# Delete month
+@app.delete("/deletemonth/{month_id}")
+async def delete_month(month_id: str):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        check_query = sql.SQL('''
+            SELECT * FROM public.months WHERE id = %s
+        ''')
+        cur.execute(check_query, (month_id,))
+        existing_entry = cur.fetchone()
+
+        if existing_entry is None:
+            raise HTTPException(status_code=404, detail="Month entry not found")
+
+        delete_query = sql.SQL('''
+            DELETE FROM public.months WHERE id = %s
+        ''')
+        cur.execute(delete_query, (month_id,))
+        conn.commit()
+
+        cur.close()
+        conn.close()
+
+        return {"message": f"Month entry deleted successfully"}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
