@@ -15,7 +15,9 @@ import os
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import time, date
-
+from fastapi import Request, HTTPException
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from jose import JWTError, jwt
 
 SECRET_KEY = os.getenv("SECRET_KEY", secrets.token_hex(32))
 ALGORITHM = "HS256"
@@ -67,10 +69,32 @@ class Token(BaseModel):
     token_type: str
     email: str
 
-# class OAuth2EmailPasswordRequestForm:
-#     def __init__(self, email: str = Form(...), password: str = Form(...)):
-#         self.email = email
-#         self.password = password
+class OAuth2EmailPasswordRequestForm:
+    def __init__(self, email: str = Form(...), password: str = Form(...)):
+        self.email = email
+        self.password = password
+
+class JWTBearer(HTTPBearer):
+    def __init__(self, auto_error: bool = True):
+        super(JWTBearer, self).__init__(auto_error=auto_error)
+
+    async def __call__(self, request: Request):
+        credentials: HTTPAuthorizationCredentials = await super(JWTBearer, self).__call__(request)
+        if credentials:
+            if not credentials.scheme == "Bearer":
+                raise HTTPException(status_code=403, detail="Invalid authentication scheme.")
+            if not self.verify_jwt(credentials.credentials):
+                raise HTTPException(status_code=403, detail="Invalid token or expired token.")
+            return credentials.credentials
+        else:
+            raise HTTPException(status_code=403, detail="Invalid authorization code.")
+
+    def verify_jwt(self, jwtoken: str) -> bool:
+        try:
+            payload = jwt.decode(jwtoken, SECRET_KEY, algorithms=[ALGORITHM])
+        except JWTError:
+            return False
+        return True
 
 class Lead(BaseModel):
     name: str
@@ -389,7 +413,7 @@ def create_access_token(data: dict, expires_delta: timedelta):
 
 #login authentication.
 @app.post('/login', response_model=Token)
-async def check_client(form_data: OAuth2PasswordRequestForm = Depends()):
+async def check_client(form_data: OAuth2EmailPasswordRequestForm = Depends()):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
@@ -397,7 +421,7 @@ async def check_client(form_data: OAuth2PasswordRequestForm = Depends()):
         query = sql.SQL('''
             SELECT password FROM public.clients WHERE email = %s
         ''')
-        cur.execute(query, (form_data.username,))
+        cur.execute(query, (form_data.email,))
         result = cur.fetchone()
 
         if not result:
@@ -409,12 +433,12 @@ async def check_client(form_data: OAuth2PasswordRequestForm = Depends()):
             raise HTTPException(status_code=400, detail="Incorrect password")
 
         access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-        access_token = create_access_token(data={"sub": form_data.username}, expires_delta=access_token_expires)
+        access_token = create_access_token(data={"sub": form_data.email}, expires_delta=access_token_expires)
 
         cur.close()
         conn.close()
 
-        return {"access_token": access_token, "token_type": "bearer", "email": form_data.username}
+        return {"access_token": access_token, "token_type": "bearer", "email": form_data.email}
 
     except (Exception, psycopg2.Error) as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -425,25 +449,22 @@ credentials_exception = HTTPException(
     detail="Could not validate credentials",
     headers={"WWW-Authenticate": "Bearer"},
 )
+  
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")  
-
-def get_current_user(token: str = Depends(oauth2_scheme)):
+def get_current_user(token: str = Depends(JWTBearer())):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email: str = payload.get("sub")
+        email: str = payload.get("sub")  # Retrieve the 'sub' field, which contains the email
         if email is None:
-            raise credentials_exception
+            raise HTTPException(status_code=401, detail="Could not validate credentials")
         return {"email": email}
     except JWTError:
-        raise credentials_exception
-
+        raise HTTPException(status_code=401, detail="Could not validate credentials")
 
 # Authorize clients
 @app.get("/users")
 async def read_users_me(current_user: dict = Security(get_current_user)):
     return {"user": current_user}
-
 
 
 # Leads code
